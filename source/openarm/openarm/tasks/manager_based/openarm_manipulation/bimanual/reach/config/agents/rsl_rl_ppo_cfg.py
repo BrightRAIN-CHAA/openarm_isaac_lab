@@ -24,7 +24,7 @@ from isaaclab.utils import configclass
 @configclass
 class OpenArmLiftPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
-    max_iterations = 550
+    max_iterations = 10000
     save_interval = 50
     experiment_name = "openarm_bi_reach"
     run_name = ""
@@ -43,7 +43,7 @@ class OpenArmLiftPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         entropy_coef=0.001,
         num_learning_epochs=8,
         num_mini_batches=4,
-        learning_rate=1.0e-2, #학습률
+        learning_rate=1.0e-3, #학습률
         schedule="adaptive",
         gamma=0.99,
         lam=0.95,

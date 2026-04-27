@@ -104,7 +104,7 @@ class CommandsCfg:
     left_object_pose = mdp.UniformPoseCommandCfg(
         asset_name="robot",
         body_name=MISSING,   # will be set by agent env cfg
-        resampling_time_range=(5.0, 5.0),
+        resampling_time_range=(99999.0, 99999.0),
         debug_vis=True,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
             pos_x=(0.1, 0.2),
@@ -119,7 +119,7 @@ class CommandsCfg:
     right_object_pose = mdp.UniformPoseCommandCfg(
         asset_name="robot",
         body_name=MISSING,   # will be set by agent env cfg
-        resampling_time_range=(5.0, 5.0),
+        resampling_time_range=(99999.0, 99999.0),
         debug_vis=True,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
             pos_x=(0.1, 0.2),
@@ -270,9 +270,12 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-        "pose_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
+        "pose_range": {"x": (0, 0), "y": (0, 0), "z": (0, 0)},
         "velocity_range": {},
         "asset_cfg": SceneEntityCfg("object_left"),
+        "roll": (0.0, 0.0),  # X축 회전 고정
+        "pitch": (0.0, 0.0), # Y축 회전 고정 (필요시 아래 yaw와 교체)
+        "yaw": (-3.14, 3.14), # Z축(수직축) 기준으로 -180도 ~ 180도 무작위 회전
         },
     )
 
@@ -280,9 +283,12 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-        "pose_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
+        "pose_range": {"x": (0, 0), "y": (0, 0), "z": (0, 0)},
         "velocity_range": {},
         "asset_cfg": SceneEntityCfg("object_right"),
+        "roll": (0.0, 0.0),  # X축 회전 고정
+        "pitch": (0.0, 0.0), # Y축 회전 고정 (필요시 아래 yaw와 교체)
+        "yaw": (-3.14, 3.14), # Z축(수직축) 기준으로 -180도 ~ 180도 무작위 회전
         },
     )
 
@@ -313,13 +319,13 @@ class RewardsCfg:
 
     left_lifting_object = RewTerm(
         func=mdp.object_is_lifted,
-        params={"minimal_height": 0.04, "object_cfg": SceneEntityCfg("object_left")},
+        params={"minimal_height": 0.45, "object_cfg": SceneEntityCfg("object_left")},
         weight=15.0
     )
 
     right_lifting_object = RewTerm(
         func=mdp.object_is_lifted,
-        params={"minimal_height": 0.04, "object_cfg": SceneEntityCfg("object_right")},
+        params={"minimal_height": 0.45, "object_cfg": SceneEntityCfg("object_right")},
         weight=15.0
     )
 
@@ -385,12 +391,12 @@ class TerminationsCfg:
 
     left_object_dropping = DoneTerm(
         func=mdp.root_height_below_minimum,
-        params={"minimum_height": -0.05, "asset_cfg": SceneEntityCfg("object_left")},
+        params={"minimum_height": 0.2, "asset_cfg": SceneEntityCfg("object_left")},
     )
 
     right_object_dropping = DoneTerm(
         func=mdp.root_height_below_minimum,
-        params={"minimum_height": -0.05, "asset_cfg": SceneEntityCfg("object_right")},
+        params={"minimum_height": 0.2, "asset_cfg": SceneEntityCfg("object_right")},
     )
 
 
@@ -439,7 +445,7 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 2
-        self.episode_length_s = 5.0
+        self.episode_length_s = 24.0
         self.viewer.eye = (3.5, 3.5, 3.5)
         # simulation settings
         self.sim.dt = 0.01  # 100Hz
