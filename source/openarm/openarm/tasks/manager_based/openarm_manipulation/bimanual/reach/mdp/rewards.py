@@ -76,34 +76,28 @@ def gripper_is_closed_reward(
     ee_frame_cfg: SceneEntityCfg,
     action_name: str
 ) -> torch.Tensor:
-    """물체 근처에서 그리퍼가 닫혔을 때 보상을 줍니다."""
-    
-    # 1. 컴포넌트 가져오기
-    object: RigidObject = env.scene[object_cfg.name]
+    object_asset: RigidObject = env.scene[object_cfg.name]
     ee_frame: FrameTransformer = env.scene[ee_frame_cfg.name]
-    
-    # 2. 위치 데이터 추출 및 거리 계산
-    cube_pos_w = object.data.root_pos_w[:, 0:3]
+    robot_asset: Articulation = env.scene["robot"]
+    cube_pos_w = object_asset.data.root_pos_w[:, 0:3]
     frame_idx = ee_frame_cfg.body_ids[0]
     ee_w = ee_frame.data.target_pos_w[:, frame_idx, :]
     dist = torch.norm(cube_pos_w - ee_w, dim=1)
-    
-    # 3. 그리퍼 상태 확인 (에러 발생 지점 수정)
-    # action_manager에서 해당 액션이 제어하는 조인트 인덱스를 가져옵니다.
-    # 만약 get_term_indices가 없다면 ._term_indices[action_name]를 시도하세요.
-    try:
-        action_indices = env.action_manager.get_term_indices(action_name)
-    except AttributeError:
-        action_indices = env.action_manager._term_indices[action_name]
+    action_term = env.action_manager._terms.get(action_name)
+    if action_term is None:
+        return torch.zeros_like(dist)
         
-    gripper_pos = torch.mean(env.scene["robot"].data.joint_pos[:, action_indices], dim=1)
+    action_indices = action_term._joint_ids
     
-    # 4. 조건부 보상 (2cm 이내 + 0.03m 보다 작게 닫힘)
-    is_near = dist < 0.02
+    gripper_pos = torch.mean(robot_asset.data.joint_pos[:, action_indices], dim=1)
+
+    # 4. 조건부 보상 (1cm 이내 & 0.03m 미만으로 닫힘)
+    is_near = dist < 0.01
     is_closed = gripper_pos < 0.03 
     
     return (is_near & is_closed).float()
 
+    
 # def object_goal_distance(
 #     env: ManagerBasedRLEnv,
 #     std: float,

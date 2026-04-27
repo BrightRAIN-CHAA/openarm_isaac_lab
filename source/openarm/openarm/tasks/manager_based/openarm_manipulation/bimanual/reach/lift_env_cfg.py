@@ -307,7 +307,7 @@ class RewardsCfg:
     left_reaching_object = RewTerm(
         func=mdp.object_ee_distance,
         params={
-            "std": 0.1,
+            "std": 0.05,
             "object_cfg": SceneEntityCfg("object_left"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"])
         },
@@ -317,7 +317,7 @@ class RewardsCfg:
     right_reaching_object = RewTerm(
         func=mdp.object_ee_distance,
         params={
-            "std": 0.1,
+            "std": 0.05,
             "object_cfg": SceneEntityCfg("object_right"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"])
         },
@@ -440,17 +440,17 @@ class CurriculumCfg:
 
     action_rate = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "action_rate", "weight": -1e-1, "num_steps": 2000000},
+        params={"term_name": "action_rate", "weight": -1e-2, "num_steps": 1e9},
     )
 
     left_joint_vel = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "left_joint_vel", "weight": -1e-2, "num_steps": 2000000},
+        params={"term_name": "left_joint_vel", "weight": -1e-3, "num_steps": 1e9},
     )
 
     right_joint_vel = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "right_joint_vel", "weight": -1e-2, "num_steps": 2000000},
+        params={"term_name": "right_joint_vel", "weight": -1e-3, "num_steps": 1e9},
     )
 
     # Reaching 가중치를 2.0에서 1.0으로 서서히 줄임
@@ -459,7 +459,7 @@ class CurriculumCfg:
     params={
         "term_name": "left_reaching_object",
         "weight": 1.0,           # 목표로 하는 최종 가중치
-        "num_steps": 2000000,    # 이 스텝(단위: env steps) 동안 서서히 변화
+        "num_steps": 1e9,    # 이 스텝(단위: env steps) 동안 서서히 변화
         },
     )
 
@@ -468,7 +468,7 @@ class CurriculumCfg:
     params={
         "term_name": "right_reaching_object",
         "weight": 1.0,
-        "num_steps": 2000000,
+        "num_steps": 1e9,
         },
     )
 
