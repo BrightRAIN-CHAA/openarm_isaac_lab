@@ -52,7 +52,7 @@ def object_ee_distance(
     object_ee_distance = torch.norm(cube_pos_w - ee_w, dim=1) #두 위치 벡터의 크기 구하기
 
     return 1 - torch.tanh(object_ee_distance / std) #1 - tanh(d/std)
-    # return 1.0 / (1.0 + torch.square(object_ee_distance / std)) #코시분포로 계산된 거
+    # return 1.0 / (1.0 + torch.square(object_ee_distance / std)) # 코시분포로 계산된 거
     
 # def object_goal_distance(
 #     env: ManagerBasedRLEnv,
