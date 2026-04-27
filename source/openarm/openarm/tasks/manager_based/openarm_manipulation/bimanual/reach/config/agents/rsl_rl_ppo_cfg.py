@@ -22,7 +22,7 @@ from isaaclab.utils import configclass
 
 
 @configclass
-class OpenArmReachPPORunnerCfg(RslRlOnPolicyRunnerCfg):
+class OpenArmLiftPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 550
     save_interval = 50
