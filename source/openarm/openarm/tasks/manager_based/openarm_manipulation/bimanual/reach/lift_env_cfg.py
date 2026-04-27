@@ -75,7 +75,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
         ),
         spawn=UsdFileCfg(
             usd_path = TABLE_USD_PATH,
-            scale = (0.005, 0.01, 0.0032),
+            scale = (0.006, 0.01, 0.0032),
         ),
     )
 
