@@ -32,8 +32,8 @@ class OpenArmLiftPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     empirical_normalization = False
     policy = RslRlPpoActorCriticCfg(
         init_noise_std=1.0,
-        actor_hidden_dims=[64, 64],
-        critic_hidden_dims=[64, 64],
+        actor_hidden_dims=[256, 256, 256], #신경망 크기
+        critic_hidden_dims=[256, 256, 256],
         activation="elu",
     )
     algorithm = RslRlPpoAlgorithmCfg(
@@ -43,7 +43,7 @@ class OpenArmLiftPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         entropy_coef=0.001,
         num_learning_epochs=8,
         num_mini_batches=4,
-        learning_rate=1.0e-2,
+        learning_rate=1.0e-2, #학습률
         schedule="adaptive",
         gamma=0.99,
         lam=0.95,
