@@ -169,7 +169,7 @@ class ObservationsCfg:
                                                                     "openarm_left_finger.*",
                                                                   ])
             },
-            noise=Unoise(n_min=-0.01, n_max=0.01),
+            # noise=Unoise(n_min=-0.01, n_max=0.01),
         )
 
         right_joint_pos = ObsTerm(
@@ -185,7 +185,7 @@ class ObservationsCfg:
                                                                     "openarm_right_finger.*",
                                                                   ])
             },
-            noise=Unoise(n_min=-0.01, n_max=0.01),
+            # noise=Unoise(n_min=-0.01, n_max=0.01),
         )
 
         left_joint_vel = ObsTerm(
@@ -201,7 +201,7 @@ class ObservationsCfg:
                                                                     "openarm_left_finger.*",
                                                                   ])
             },
-            noise=Unoise(n_min=-0.01, n_max=0.01),
+            # noise=Unoise(n_min=-0.01, n_max=0.01),
         )
         right_joint_vel = ObsTerm(
             func=mdp.joint_vel_rel,
@@ -216,7 +216,7 @@ class ObservationsCfg:
                                                                     "openarm_right_finger.*",
                                                                   ])
             },
-            noise=Unoise(n_min=-0.01, n_max=0.01),
+            # noise=Unoise(n_min=-0.01, n_max=0.01),
         )
 
         left_object_position = ObsTerm(
@@ -261,7 +261,7 @@ class EventCfg:
         func=mdp.reset_joints_by_scale,
         mode="reset",
         params={
-            "position_range": (0.8, 1.2),
+            "position_range": (0.9, 1.1),
             "velocity_range": (0.0, 0.0),
         },
     )
@@ -311,7 +311,7 @@ class RewardsCfg:
             "object_cfg": SceneEntityCfg("object_left"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"])
         },
-        weight=1.0
+        weight=2.0
     )
 
     right_reaching_object = RewTerm(
@@ -321,19 +321,46 @@ class RewardsCfg:
             "object_cfg": SceneEntityCfg("object_right"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"])
         },
-        weight=1.0
+        weight=2.0
     )
 
     left_lifting_object = RewTerm(
         func=mdp.object_is_lifted,
-        params={"minimal_height": 0.45, "object_cfg": SceneEntityCfg("object_left")},
+        params={
+            "minimal_height": 0.45,
+            "table_height": 0.349,
+            "object_cfg": SceneEntityCfg("object_left")
+        },
+        weight=15.0
+)
+    right_lifting_object = RewTerm(
+        func=mdp.object_is_lifted,
+        params={
+            "minimal_height": 0.45,
+            "table_height": 0.349,
+            "object_cfg": SceneEntityCfg("object_right")
+        },
         weight=15.0
     )
 
-    right_lifting_object = RewTerm(
-        func=mdp.object_is_lifted,
-        params={"minimal_height": 0.45, "object_cfg": SceneEntityCfg("object_right")},
-        weight=15.0
+    left_gripper_close = RewTerm(
+        func=mdp.gripper_is_closed_reward,
+        params={
+            "object_cfg": SceneEntityCfg("object_left"),
+            "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"]),
+            "action_name": "left_gripper_action"
+        },
+        weight=5.0
+    )
+
+    right_gripper_close = RewTerm(
+        func=mdp.gripper_is_closed_reward,
+        params={
+            "object_cfg": SceneEntityCfg("object_right"),
+            "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"]),
+            "action_name": "right_gripper_action"
+        },
+        weight=5.0
     )
 
     # left_object_goal_tracking = RewTerm(
@@ -361,7 +388,7 @@ class RewardsCfg:
     # )
 
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.0001)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.005)
     left_joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
         weight=-0.0001,
@@ -413,17 +440,36 @@ class CurriculumCfg:
 
     action_rate = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "action_rate", "weight": -1e-3, "num_steps": 10000},
+        params={"term_name": "action_rate", "weight": -1e-1, "num_steps": 2000000},
     )
 
     left_joint_vel = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "left_joint_vel", "weight": -1e-3, "num_steps": 10000},
+        params={"term_name": "left_joint_vel", "weight": -1e-2, "num_steps": 2000000},
     )
 
     right_joint_vel = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "right_joint_vel", "weight": -1e-3, "num_steps": 10000},
+        params={"term_name": "right_joint_vel", "weight": -1e-2, "num_steps": 2000000},
+    )
+
+    # Reaching 가중치를 2.0에서 1.0으로 서서히 줄임
+    reach_weight_left = CurrTerm(
+    func=mdp.modify_reward_weight,
+    params={
+        "term_name": "left_reaching_object",
+        "weight": 1.0,           # 목표로 하는 최종 가중치
+        "num_steps": 2000000,    # 이 스텝(단위: env steps) 동안 서서히 변화
+        },
+    )
+
+    reach_weight_right = CurrTerm(
+    func=mdp.modify_reward_weight,
+    params={
+        "term_name": "right_reaching_object",
+        "weight": 1.0,
+        "num_steps": 2000000,
+        },
     )
 
 

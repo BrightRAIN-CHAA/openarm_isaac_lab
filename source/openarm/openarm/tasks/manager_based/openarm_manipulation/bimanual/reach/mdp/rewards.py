@@ -25,14 +25,28 @@ from isaaclab.sensors import FrameTransformer
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
 
+# def object_is_lifted(
+#     env: ManagerBasedRLEnv,
+#     minimal_height: float,
+#     object_cfg: SceneEntityCfg,
+# ) -> torch.Tensor:
+#     """Reward the agent for lifting the object above the minimal height."""
+#     object: RigidObject = env.scene[object_cfg.name]
+#     return torch.where(object.data.root_pos_w[:, 2] > minimal_height, 1.0, 0.0)
+
 def object_is_lifted(
     env: ManagerBasedRLEnv,
     minimal_height: float,
-    object_cfg: SceneEntityCfg,
+    table_height: float,
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
 ) -> torch.Tensor:
-    """Reward the agent for lifting the object above the minimal height."""
+    """물체를 들어올린 높이에 비례하여 선형적으로 보상."""
     object: RigidObject = env.scene[object_cfg.name]
-    return torch.where(object.data.root_pos_w[:, 2] > minimal_height, 1.0, 0.0)
+    current_height = object.data.root_pos_w[:, 2]
+    lift_dist = current_height - table_height
+    target_lift_dist = minimal_height - table_height
+    reward = lift_dist / target_lift_dist
+    return torch.clamp(reward, min=0.0, max=1.0)
 
 def object_ee_distance(
     env: ManagerBasedRLEnv,
@@ -50,11 +64,46 @@ def object_ee_distance(
     ee_w = ee_frame.data.target_pos_w[:, frame_idx, :]
     
     object_ee_distance = torch.norm(cube_pos_w - ee_w, dim=1) #두 위치 벡터의 크기 구하기
-    return 1 - torch.tanh(object_ee_distance / std) - 0.1*object_ee_distance
-    
+    return 1.0 / (1.0 + torch.square(object_ee_distance / std)) # 코시분포로 계산된 거리
+
+    # return 1 - torch.tanh(object_ee_distance / std) - 0.3*object_ee_distance
     # return 1 - torch.tanh(object_ee_distance / std) #1 - tanh(d/std)
-    # return 1.0 / (1.0 + torch.square(object_ee_distance / std)) # 코시분포로 계산된 거
     
+    
+def gripper_is_closed_reward(
+    env: ManagerBasedRLEnv, 
+    object_cfg: SceneEntityCfg, 
+    ee_frame_cfg: SceneEntityCfg,
+    action_name: str
+) -> torch.Tensor:
+    """물체 근처에서 그리퍼가 닫혔을 때 보상을 줍니다."""
+    
+    # 1. 컴포넌트 가져오기
+    object: RigidObject = env.scene[object_cfg.name]
+    ee_frame: FrameTransformer = env.scene[ee_frame_cfg.name]
+    
+    # 2. 위치 데이터 추출 및 거리 계산
+    cube_pos_w = object.data.root_pos_w[:, 0:3]
+    frame_idx = ee_frame_cfg.body_ids[0]
+    ee_w = ee_frame.data.target_pos_w[:, frame_idx, :]
+    dist = torch.norm(cube_pos_w - ee_w, dim=1)
+    
+    # 3. 그리퍼 상태 확인 (에러 발생 지점 수정)
+    # action_manager에서 해당 액션이 제어하는 조인트 인덱스를 가져옵니다.
+    # 만약 get_term_indices가 없다면 ._term_indices[action_name]를 시도하세요.
+    try:
+        action_indices = env.action_manager.get_term_indices(action_name)
+    except AttributeError:
+        action_indices = env.action_manager._term_indices[action_name]
+        
+    gripper_pos = torch.mean(env.scene["robot"].data.joint_pos[:, action_indices], dim=1)
+    
+    # 4. 조건부 보상 (2cm 이내 + 0.03m 보다 작게 닫힘)
+    is_near = dist < 0.02
+    is_closed = gripper_pos < 0.03 
+    
+    return (is_near & is_closed).float()
+
 # def object_goal_distance(
 #     env: ManagerBasedRLEnv,
 #     std: float,

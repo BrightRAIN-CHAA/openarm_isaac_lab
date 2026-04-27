@@ -112,14 +112,14 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             asset_name="robot",
             joint_names=["openarm_left_finger_joint.*"],
             open_command_expr={"openarm_left_finger_joint.*": 0.044},
-            close_command_expr={"openarm_left_finger_joint.*": 0.0},
+            close_command_expr={"openarm_left_finger_joint.*": 0.028},
         )
 
         self.actions.right_gripper_action = mdp.BinaryJointPositionActionCfg(
             asset_name="robot",
             joint_names=["openarm_right_finger_joint.*"],
             open_command_expr={"openarm_right_finger_joint.*": 0.044},
-            close_command_expr={"openarm_right_finger_joint.*": 0.0},
+            close_command_expr={"openarm_right_finger_joint.*": 0.028},
         )
         
         # Set the body name for the end effector_tcp
@@ -132,7 +132,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
         self.scene.object_left = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/ObjectLeft",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.4, 0.3, 0.37], rot=[1, 0, 0, 0] # y좌표를 0.3으로 설정하여 왼쪽에 배치, 초기 위치 고정
+                pos=[0.4, 0.3, 0.35], rot=[1, 0, 0, 0] # y좌표를 0.3으로 설정하여 왼쪽에 배치, 초기 위치 고정
             ),
             spawn=UsdFileCfg(
                 usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
@@ -152,7 +152,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
         self.scene.object_right = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/ObjectRight",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.4, -0.3, 0.37], rot=[1, 0, 0, 0] # y좌표를 -0.3으로 설정하여 오른쪽에 배치, 초기 위치 고정
+                pos=[0.4, -0.3, 0.35], rot=[1, 0, 0, 0] # y좌표를 -0.3으로 설정하여 오른쪽에 배치, 초기 위치 고정
             ),
             spawn=UsdFileCfg(
                 usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
