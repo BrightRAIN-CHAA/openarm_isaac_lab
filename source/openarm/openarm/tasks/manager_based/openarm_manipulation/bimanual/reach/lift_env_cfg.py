@@ -75,7 +75,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
         ),
         spawn=UsdFileCfg(
             usd_path = TABLE_USD_PATH,
-            scale = (0.006, 0.01, 0.0032),
+            scale = (0.006, 0.01, 0.0032), #테이블 높이 0.3181
         ),
     )
 
@@ -269,13 +269,17 @@ class EventCfg:
     reset_left_object_position = EventTerm(
         func=mdp.reset_root_state_uniform,
         mode="reset",
-        params={
-        "pose_range": {"x": (0, 0), "y": (0, 0), "z": (0, 0)},
-        "velocity_range": {},
-        "asset_cfg": SceneEntityCfg("object_left"),
-        "roll": (0.0, 0.0),  # X축 회전 고정
-        "pitch": (0.0, 0.0), # Y축 회전 고정 (필요시 아래 yaw와 교체)
-        "yaw": (-3.14, 3.14), # Z축(수직축) 기준으로 -180도 ~ 180도 무작위 회전
+         params={
+            "pose_range": {
+                "x": (0, 0), 
+                "y": (0, 0), 
+                "z": (0, 0),
+                "roll": (0.0, 0.0),
+                "pitch": (0.0, 0.0),
+                "yaw": (-3.14, 3.14),
+            },
+            "velocity_range": {},
+            "asset_cfg": SceneEntityCfg("object_left"),
         },
     )
 
@@ -283,15 +287,18 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-        "pose_range": {"x": (0, 0), "y": (0, 0), "z": (0, 0)},
-        "velocity_range": {},
-        "asset_cfg": SceneEntityCfg("object_right"),
-        "roll": (0.0, 0.0),  # X축 회전 고정
-        "pitch": (0.0, 0.0), # Y축 회전 고정 (필요시 아래 yaw와 교체)
-        "yaw": (-3.14, 3.14), # Z축(수직축) 기준으로 -180도 ~ 180도 무작위 회전
+            "pose_range": {
+                "x": (0, 0), 
+                "y": (0, 0), 
+                "z": (0, 0),
+                "roll": (0.0, 0.0),
+                "pitch": (0.0, 0.0),
+                "yaw": (-3.14, 3.14),
+            },
+            "velocity_range": {},
+            "asset_cfg": SceneEntityCfg("object_right"),
         },
     )
-
 
 @configclass
 class RewardsCfg:
@@ -304,7 +311,7 @@ class RewardsCfg:
             "object_cfg": SceneEntityCfg("object_left"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"])
         },
-        weight=1.1
+        weight=1.0
     )
 
     right_reaching_object = RewTerm(
@@ -314,7 +321,7 @@ class RewardsCfg:
             "object_cfg": SceneEntityCfg("object_right"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"])
         },
-        weight=1.1
+        weight=1.0
     )
 
     left_lifting_object = RewTerm(
@@ -406,17 +413,17 @@ class CurriculumCfg:
 
     action_rate = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "action_rate", "weight": -1e-1, "num_steps": 10000},
+        params={"term_name": "action_rate", "weight": -1e-3, "num_steps": 10000},
     )
 
     left_joint_vel = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "left_joint_vel", "weight": -1e-1, "num_steps": 10000},
+        params={"term_name": "left_joint_vel", "weight": -1e-3, "num_steps": 10000},
     )
 
     right_joint_vel = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "right_joint_vel", "weight": -1e-1, "num_steps": 10000},
+        params={"term_name": "right_joint_vel", "weight": -1e-3, "num_steps": 10000},
     )
 
 
@@ -445,7 +452,7 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 2
-        self.episode_length_s = 24.0
+        self.episode_length_s = 12.0
         self.viewer.eye = (3.5, 3.5, 3.5)
         # simulation settings
         self.sim.dt = 0.01  # 100Hz

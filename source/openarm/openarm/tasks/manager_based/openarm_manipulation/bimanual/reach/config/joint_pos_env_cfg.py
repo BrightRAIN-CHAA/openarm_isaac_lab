@@ -136,7 +136,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             ),
             spawn=UsdFileCfg(
                 usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                scale=(0.8, 0.8, 0.8),
+                scale=(0.8, 0.8, 0.8), #큐브 크기 한 변에 0.06
                 rigid_props=RigidBodyPropertiesCfg(
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,
@@ -148,7 +148,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             ),
         )
 
-        # Set Right Cube as object 
+        # Set Right Cube as object
         self.scene.object_right = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/ObjectRight",
             init_state=RigidObjectCfg.InitialStateCfg(
