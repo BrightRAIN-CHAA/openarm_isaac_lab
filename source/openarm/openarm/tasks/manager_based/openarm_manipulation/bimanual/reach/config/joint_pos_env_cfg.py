@@ -148,7 +148,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             ),
         )
 
-        # Set Right Cube as object
+        # Set Right Cube as object 
         self.scene.object_right = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/ObjectRight",
             init_state=RigidObjectCfg.InitialStateCfg(
