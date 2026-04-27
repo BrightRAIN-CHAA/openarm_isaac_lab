@@ -122,9 +122,9 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             close_command_expr={"openarm_right_finger_joint.*": 0.0},
         )
         
-        # Set the body name for the end effector
-        self.commands.left_object_pose.body_name = "openarm_left_hand"
-        self.commands.right_object_pose.body_name = "openarm_right_hand"
+        # Set the body name for the end effector_tcp
+        self.commands.left_object_pose.body_name = "openarm_left_ee_tcp"
+        self.commands.right_object_pose.body_name = "openarm_right_ee_tcp"
         self.commands.left_object_pose.ranges.pitch = (math.pi / 2, math.pi / 2) #로봇 손의 pitch(위아래로 기울어지는 각도) 목표값을 90 degree
         self.commands.right_object_pose.ranges.pitch = (math.pi / 2, math.pi / 2)
 
@@ -132,7 +132,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
         self.scene.object_left = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/ObjectLeft",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.4, 0.3, 0.37], rot=[1, 0, 0, 0] # y좌표를 0.3으로 설정하여 왼쪽에 배치
+                pos=[0.4, 0.3, 0.37], rot=[1, 0, 0, 0] # y좌표를 0.3으로 설정하여 왼쪽에 배치, 초기 위치 고정
             ),
             spawn=UsdFileCfg(
                 usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
@@ -152,7 +152,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
         self.scene.object_right = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/ObjectRight",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.4, -0.3, 0.37], rot=[1, 0, 0, 0] # y좌표를 -0.3으로 설정하여 오른쪽에 배치, 이거 고정된거임 랜덤으로 바꿔야됨
+                pos=[0.4, -0.3, 0.37], rot=[1, 0, 0, 0] # y좌표를 -0.3으로 설정하여 오른쪽에 배치, 초기 위치 고정
             ),
             spawn=UsdFileCfg(
                 usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
@@ -179,11 +179,11 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             target_frames=[
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/openarm_left_ee_tcp",
-                    name="left_end_effector",
+                    name="openarm_left_ee_tcp",
                 ),
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/openarm_right_ee_tcp",
-                    name="right_end_effector",
+                    name="openarm_right_ee_tcp",
                 ),
             ],
         )

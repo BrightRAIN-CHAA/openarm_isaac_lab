@@ -261,7 +261,7 @@ class EventCfg:
         func=mdp.reset_joints_by_scale,
         mode="reset",
         params={
-            "position_range": (1.0, 1.0), #robot's reset position range fix
+            "position_range": (0.8, 1.2),
             "velocity_range": (0.0, 0.0),
         },
     )
@@ -270,7 +270,7 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-        "pose_range": {"x": (0.0, 0.0), "y": (0.0, 0.0), "z": (0.0, 0.0)}, # change later(random range of cube)
+        "pose_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
         "velocity_range": {},
         "asset_cfg": SceneEntityCfg("object_left"),
         },
@@ -280,7 +280,7 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-        "pose_range": {"x": (0.0, 0.0), "y": (0.0, 0.0), "z": (0.0, 0.0)}, # change later(random range of cube)
+        "pose_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
         "velocity_range": {},
         "asset_cfg": SceneEntityCfg("object_right"),
         },
@@ -296,7 +296,7 @@ class RewardsCfg:
         params={
             "std": 0.1,
             "object_cfg": SceneEntityCfg("object_left"),
-            "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["left_end_effector"])
+            "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"])
         },
         weight=1.1
     )
@@ -306,7 +306,7 @@ class RewardsCfg:
         params={
             "std": 0.1,
             "object_cfg": SceneEntityCfg("object_right"),
-            "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["right_end_effector"])
+            "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"])
         },
         weight=1.1
     )
@@ -323,29 +323,29 @@ class RewardsCfg:
         weight=15.0
     )
 
-    left_object_goal_tracking = RewTerm(
-        func=mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.04, "command_name": "left_object_pose", "object_cfg": SceneEntityCfg("object_left")},
-        weight=16.0,
-    )
+    # left_object_goal_tracking = RewTerm(
+    #     func=mdp.object_goal_distance,
+    #     params={"std": 0.3, "minimal_height": 0.04, "command_name": "left_object_pose", "object_cfg": SceneEntityCfg("object_left")},
+    #     weight=16.0,
+    # )
 
-    right_object_goal_tracking = RewTerm(
-        func=mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.04, "command_name": "right_object_pose", "object_cfg": SceneEntityCfg("object_right")},
-        weight=16.0,
-    )
+    # right_object_goal_tracking = RewTerm(
+    #     func=mdp.object_goal_distance,
+    #     params={"std": 0.3, "minimal_height": 0.04, "command_name": "right_object_pose", "object_cfg": SceneEntityCfg("object_right")},
+    #     weight=16.0,
+    # )
 
-    left_object_goal_tracking_fine_grained = RewTerm(
-        func=mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.04, "command_name": "left_object_pose", "object_cfg": SceneEntityCfg("object_left")},
-        weight=5.0,
-    )
+    # left_object_goal_tracking_fine_grained = RewTerm(
+    #     func=mdp.object_goal_distance,
+    #     params={"std": 0.05, "minimal_height": 0.04, "command_name": "left_object_pose", "object_cfg": SceneEntityCfg("object_left")},
+    #     weight=5.0,
+    # )
 
-    right_object_goal_tracking_fine_grained = RewTerm(
-        func=mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.04, "command_name": "right_object_pose", "object_cfg": SceneEntityCfg("object_right")},
-        weight=5.0,
-    )
+    # right_object_goal_tracking_fine_grained = RewTerm(
+    #     func=mdp.object_goal_distance,
+    #     params={"std": 0.05, "minimal_height": 0.04, "command_name": "right_object_pose", "object_cfg": SceneEntityCfg("object_right")},
+    #     weight=5.0,
+    # )
 
     # action penalty
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.0001)
