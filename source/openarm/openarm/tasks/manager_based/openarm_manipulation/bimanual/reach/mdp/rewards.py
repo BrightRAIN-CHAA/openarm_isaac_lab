@@ -25,31 +25,6 @@ from isaaclab.sensors import FrameTransformer
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
 
-# def object_is_lifted(
-#     env: ManagerBasedRLEnv,
-#     minimal_height: float,
-#     object_cfg: SceneEntityCfg,
-# ) -> torch.Tensor:
-#     """Reward the agent for lifting the object above the minimal height."""
-#     object: RigidObject = env.scene[object_cfg.name]
-#     return torch.where(object.data.root_pos_w[:, 2] > minimal_height, 1.0, 0.0)
-
-def object_is_lifted(
-    env: ManagerBasedRLEnv,
-    std: float,
-    minimal_height: float,
-    table_height: float,
-    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
-) -> torch.Tensor:
-    """물체를 들어올린 높이에 비례하여 코시분포로 보상."""
-    object: RigidObject = env.scene[object_cfg.name]
-    object_height = object.data.root_pos_w[:, 2]
-    lift_dist = object_height - table_height #현재 물체의 높이 및 실제 들어올린 거리 계산
-    target_lift_dist = minimal_height - table_height
-    abs_error = torch.abs(target_lift_dist - lift_dist)
-
-    return 1.0 / (1.0 + torch.square(abs_error / std))
-
 def object_ee_distance(
     env: ManagerBasedRLEnv,
     std: float,
@@ -68,10 +43,6 @@ def object_ee_distance(
     object_ee_distance = torch.norm(cube_pos_w - ee_w, dim=1) #두 위치 벡터의 크기 구하기
     return 1.0 / (1.0 + torch.square(object_ee_distance / std)) # 코시분포로 계산된 거리
 
-    # return 1 - torch.tanh(object_ee_distance / std) - 0.3*object_ee_distance
-    # return 1 - torch.tanh(object_ee_distance / std) #1 - tanh(d/std)
-    
-    
 def gripper_is_closed_reward(
     env: ManagerBasedRLEnv, 
     object_cfg: SceneEntityCfg, 
@@ -98,7 +69,20 @@ def gripper_is_closed_reward(
     
     return (is_near & is_closed).float()
 
+def object_is_lifted(
+    env: ManagerBasedRLEnv,
+    target_height: float, #lift_env_cfg.py도 이름 바꿔야함
+    table_height: float,
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+) -> torch.Tensor:
+    object: RigidObject = env.scene[object_cfg.name]
+    object_height = object.data.root_pos_w[:, 2]
+    lift_height = torch.clamp(object_height - table_height, min=0.0) #최소값은 0으로 지정
+
+    scale = 3.0 / target_height
     
+    return torch.tanh(scale * lift_height) #tanh(3.0) ≒ 0.99 가 되도록 계수 설정
+
 # def object_goal_distance(
 #     env: ManagerBasedRLEnv,
 #     std: float,
