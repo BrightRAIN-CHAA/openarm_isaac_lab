@@ -399,9 +399,16 @@ class RewardsCfg:
                                                                     "openarm_left_joint5",
                                                                     "openarm_left_joint6",
                                                                     "openarm_left_joint7",
-                                                                    "openarm_left_finger.*",
+                                                                    #"openarm_left_finger.*",
                                                                   ])},
     )
+    
+    # left_finger_vel = RewTerm(
+    #     func=mdp.joint_vel_l2,
+    #     weight=-0.001,
+    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_finger.*"])},
+    # )
+
     right_joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
         weight=-0.0001,
@@ -412,9 +419,15 @@ class RewardsCfg:
                                                                     "openarm_right_joint5",
                                                                     "openarm_right_joint6",
                                                                     "openarm_right_joint7",
-                                                                    "openarm_right_finger.*",
+                                                                    #"openarm_right_finger.*",
                                                                   ])},
     )
+
+    # right_finger_vel = RewTerm(
+    #     func=mdp.joint_vel_l2,
+    #     weight=-0.001,
+    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_finger.*"])},
+    # )
 
 
 @configclass
@@ -453,24 +466,23 @@ class CurriculumCfg:
         params={"term_name": "right_joint_vel", "weight": -1e-3, "num_steps": 1e9},
     )
 
-    # Reaching 가중치를 2.0에서 1.0으로 서서히 줄임
-    reach_weight_left = CurrTerm(
-    func=mdp.modify_reward_weight,
-    params={
-        "term_name": "left_reaching_object",
-        "weight": 1.0,           # 목표로 하는 최종 가중치
-        "num_steps": 1e9,    # 이 스텝(단위: env steps) 동안 서서히 변화
-        },
-    )
+    # reach_weight_left = CurrTerm(
+    # func=mdp.modify_reward_weight,
+    # params={
+    #     "term_name": "left_reaching_object",
+    #     "weight": 1.5,
+    #     "num_steps": 1e9,
+    #     },
+    # )
 
-    reach_weight_right = CurrTerm(
-    func=mdp.modify_reward_weight,
-    params={
-        "term_name": "right_reaching_object",
-        "weight": 1.0,
-        "num_steps": 1e9,
-        },
-    )
+    # reach_weight_right = CurrTerm(
+    # func=mdp.modify_reward_weight,
+    # params={
+    #     "term_name": "right_reaching_object",
+    #     "weight": 1.5,
+    #     "num_steps": 1e9,
+    #     },
+    # )
 
 
 ##

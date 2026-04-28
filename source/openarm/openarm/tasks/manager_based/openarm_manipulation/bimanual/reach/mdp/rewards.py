@@ -91,9 +91,8 @@ def gripper_is_closed_reward(
     
     gripper_pos = torch.mean(robot_asset.data.joint_pos[:, action_indices], dim=1)
 
-    # 4. 조건부 보상 (1cm 이내 & 0.03m 미만으로 닫힘)
-    is_near = dist < 0.01
-    is_closed = gripper_pos < 0.03 
+    is_near = dist < 0.02
+    is_closed = gripper_pos < 0.033
     
     return (is_near & is_closed).float()
 

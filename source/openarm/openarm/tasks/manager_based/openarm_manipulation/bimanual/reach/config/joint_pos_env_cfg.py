@@ -58,14 +58,14 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
                     "openarm_left_joint1": 0.0,
                     "openarm_left_joint2": 0.0,
                     "openarm_left_joint3": 0.0,
-                    "openarm_left_joint4": 1.5,
+                    "openarm_left_joint4": 2.0,
                     "openarm_left_joint5": 0.0,
                     "openarm_left_joint6": 0.0,
                     "openarm_left_joint7": 0.0,
                     "openarm_right_joint1": 0.0,
                     "openarm_right_joint2": 0.0,
                     "openarm_right_joint3": 0.0,
-                    "openarm_right_joint4": 1.5,
+                    "openarm_right_joint4": 2.0,
                     "openarm_right_joint5": 0.0,
                     "openarm_right_joint6": 0.0,
                     "openarm_right_joint7": 0.0,
@@ -112,14 +112,14 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             asset_name="robot",
             joint_names=["openarm_left_finger_joint.*"],
             open_command_expr={"openarm_left_finger_joint.*": 0.044},
-            close_command_expr={"openarm_left_finger_joint.*": 0.028},
+            close_command_expr={"openarm_left_finger_joint.*": 0.033},
         )
 
         self.actions.right_gripper_action = mdp.BinaryJointPositionActionCfg(
             asset_name="robot",
             joint_names=["openarm_right_finger_joint.*"],
             open_command_expr={"openarm_right_finger_joint.*": 0.044},
-            close_command_expr={"openarm_right_finger_joint.*": 0.028},
+            close_command_expr={"openarm_right_finger_joint.*": 0.033},
         )
         
         # Set the body name for the end effector_tcp
@@ -180,13 +180,11 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/openarm_left_ee_tcp",
                     name="openarm_left_ee_tcp",
-                    # 왼팔 TCP를 손바닥 쪽으로 3cm 당김
                     offset=OffsetCfg(pos=(0.0, 0.0, -0.035)), 
                 ),
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/openarm_right_ee_tcp",
                     name="openarm_right_ee_tcp",
-                    # 오른팔 TCP를 손바닥 쪽으로 3cm 당김
                     offset=OffsetCfg(pos=(0.0, 0.0, -0.035)), 
                 ),
             ],
