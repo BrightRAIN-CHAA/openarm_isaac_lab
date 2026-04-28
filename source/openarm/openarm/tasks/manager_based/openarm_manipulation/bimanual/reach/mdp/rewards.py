@@ -36,17 +36,19 @@ if TYPE_CHECKING:
 
 def object_is_lifted(
     env: ManagerBasedRLEnv,
+    std: float,
     minimal_height: float,
     table_height: float,
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
 ) -> torch.Tensor:
-    """물체를 들어올린 높이에 비례하여 선형적으로 보상."""
+    """물체를 들어올린 높이에 비례하여 코시분포로 보상."""
     object: RigidObject = env.scene[object_cfg.name]
-    current_height = object.data.root_pos_w[:, 2]
-    lift_dist = current_height - table_height
+    object_height = object.data.root_pos_w[:, 2]
+    lift_dist = object_height - table_height #현재 물체의 높이 및 실제 들어올린 거리 계산
     target_lift_dist = minimal_height - table_height
-    reward = lift_dist / target_lift_dist
-    return torch.clamp(reward, min=0.0, max=1.0)
+    abs_error = torch.abs(target_lift_dist - lift_dist)
+
+    return 1.0 / (1.0 + torch.square(abs_error / std))
 
 def object_ee_distance(
     env: ManagerBasedRLEnv,

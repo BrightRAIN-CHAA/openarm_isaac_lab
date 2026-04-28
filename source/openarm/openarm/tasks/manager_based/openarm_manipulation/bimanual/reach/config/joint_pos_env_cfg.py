@@ -181,13 +181,13 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
                     prim_path="{ENV_REGEX_NS}/Robot/openarm_left_ee_tcp",
                     name="openarm_left_ee_tcp",
                     # 왼팔 TCP를 손바닥 쪽으로 3cm 당김
-                    offset=OffsetCfg(pos=(0.0, 0.0, -0.035)), 
+                    offset=OffsetCfg(pos=(0.0, 0.0, -0.025)), 
                 ),
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/openarm_right_ee_tcp",
                     name="openarm_right_ee_tcp",
                     # 오른팔 TCP를 손바닥 쪽으로 3cm 당김
-                    offset=OffsetCfg(pos=(0.0, 0.0, -0.035)), 
+                    offset=OffsetCfg(pos=(0.0, 0.0, -0.025)), 
                 ),
             ],
         )

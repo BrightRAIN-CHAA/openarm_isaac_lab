@@ -327,6 +327,7 @@ class RewardsCfg:
     left_lifting_object = RewTerm(
         func=mdp.object_is_lifted,
         params={
+            "std": 0.05,
             "minimal_height": 0.45,
             "table_height": 0.349,
             "object_cfg": SceneEntityCfg("object_left")
@@ -336,6 +337,7 @@ class RewardsCfg:
     right_lifting_object = RewTerm(
         func=mdp.object_is_lifted,
         params={
+            "std": 0.05,
             "minimal_height": 0.45,
             "table_height": 0.349,
             "object_cfg": SceneEntityCfg("object_right")
