@@ -180,12 +180,12 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/openarm_left_ee_tcp",
                     name="openarm_left_ee_tcp",
-                    offset=OffsetCfg(pos=(0.0, 0.0, -0.035)), 
+                    offset=OffsetCfg(pos=(0.0, 0.0, -0.035)),
                 ),
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/openarm_right_ee_tcp",
                     name="openarm_right_ee_tcp",
-                    offset=OffsetCfg(pos=(0.0, 0.0, -0.035)), 
+                    offset=OffsetCfg(pos=(0.0, 0.0, -0.035)),
                 ),
             ],
         )

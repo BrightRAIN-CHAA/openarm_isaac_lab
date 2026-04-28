@@ -327,6 +327,7 @@ class RewardsCfg:
     left_lifting_object = RewTerm(
         func=mdp.object_is_lifted,
         params={
+            "std": 0.05,
             "minimal_height": 0.45,
             "table_height": 0.349,
             "object_cfg": SceneEntityCfg("object_left")
@@ -336,6 +337,7 @@ class RewardsCfg:
     right_lifting_object = RewTerm(
         func=mdp.object_is_lifted,
         params={
+            "std": 0.05,
             "minimal_height": 0.45,
             "table_height": 0.349,
             "object_cfg": SceneEntityCfg("object_right")
@@ -403,11 +405,11 @@ class RewardsCfg:
                                                                   ])},
     )
     
-    # left_finger_vel = RewTerm(
-    #     func=mdp.joint_vel_l2,
-    #     weight=-0.001,
-    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_finger.*"])},
-    # )
+    left_finger_vel = RewTerm(
+        func=mdp.joint_vel_l2,
+        weight=-0.001,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_finger.*"])},
+    )
 
     right_joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
@@ -423,11 +425,11 @@ class RewardsCfg:
                                                                   ])},
     )
 
-    # right_finger_vel = RewTerm(
-    #     func=mdp.joint_vel_l2,
-    #     weight=-0.001,
-    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_finger.*"])},
-    # )
+    right_finger_vel = RewTerm(
+        func=mdp.joint_vel_l2,
+        weight=-0.001,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_finger.*"])},
+    )
 
 
 @configclass
@@ -453,17 +455,17 @@ class CurriculumCfg:
 
     action_rate = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "action_rate", "weight": -1e-2, "num_steps": 1e9},
+        params={"term_name": "action_rate", "weight": -1e-1, "num_steps": 1e9},
     )
 
     left_joint_vel = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "left_joint_vel", "weight": -1e-3, "num_steps": 1e9},
+        params={"term_name": "left_joint_vel", "weight": -1e-2, "num_steps": 1e9},
     )
 
     right_joint_vel = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "right_joint_vel", "weight": -1e-3, "num_steps": 1e9},
+        params={"term_name": "right_joint_vel", "weight": -1e-2, "num_steps": 1e9},
     )
 
     # reach_weight_left = CurrTerm(
