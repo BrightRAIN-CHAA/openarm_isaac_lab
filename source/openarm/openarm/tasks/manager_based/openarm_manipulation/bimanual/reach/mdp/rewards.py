@@ -71,17 +71,18 @@ def gripper_is_closed_reward(
 
 def object_is_lifted(
     env: ManagerBasedRLEnv,
-    target_height: float, #lift_env_cfg.py도 이름 바꿔야함
+    target_height: float, #책상으로부터 들어올릴 높이
     table_height: float,
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
 ) -> torch.Tensor:
     object: RigidObject = env.scene[object_cfg.name]
     object_height = object.data.root_pos_w[:, 2]
-    lift_height = torch.clamp(object_height - table_height, min=0.0) #최소값은 0으로 지정
+    lift_height = torch.clamp(object_height - table_height - 0.03, min=0.0) #최소값은 0으로 지정, 큐브 중심 위치 0.03 offset
 
-    scale = 3.0 / target_height
+    scale = 1.5 / target_height
+    reward = torch.clamp( 1.11 * torch.tanh(scale * lift_height), min =0.0, max = 1.0) #1.11 * tanh(1.5) ≒ 1.0이 되도록
     
-    return torch.tanh(scale * lift_height) #tanh(3.0) ≒ 0.99 가 되도록 계수 설정
+    return reward
 
 # def object_goal_distance(
 #     env: ManagerBasedRLEnv,
