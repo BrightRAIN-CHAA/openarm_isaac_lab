@@ -307,21 +307,21 @@ class RewardsCfg:
     left_reaching_object = RewTerm(
         func=mdp.object_ee_distance,
         params={
-            "std": 0.05,
+            "std": 0.1,
             "object_cfg": SceneEntityCfg("object_left"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"])
         },
-        weight=2.0
+        weight=3.0
     )
 
     right_reaching_object = RewTerm(
         func=mdp.object_ee_distance,
         params={
-            "std": 0.05,
+            "std": 0.1,
             "object_cfg": SceneEntityCfg("object_right"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"])
         },
-        weight=2.0
+        weight=3.0
     )
 
     left_lifting_object = RewTerm(
@@ -331,8 +331,8 @@ class RewardsCfg:
             "table_height": 0.349,
             "object_cfg": SceneEntityCfg("object_left")
         },
-        weight=15.0
-)
+        weight=10.0
+    )
     right_lifting_object = RewTerm(
         func=mdp.object_is_lifted,
         params={
@@ -340,27 +340,27 @@ class RewardsCfg:
             "table_height": 0.349,
             "object_cfg": SceneEntityCfg("object_right")
         },
-        weight=15.0
+        weight=10.0
     )
 
-    left_gripper_close = RewTerm(
-        func=mdp.gripper_is_closed_reward,
-        params={
-            "object_cfg": SceneEntityCfg("object_left"),
-            "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"]),
-            "action_name": "left_gripper_action"
-        },
-        weight=5.0
+    left_gripper_grasped = RewTerm(
+    func=mdp.gripper_is_grasped_reward,
+    params={
+        "object_cfg": SceneEntityCfg("object_left"),
+        "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"]),
+        "action_name": "left_gripper_action",
+    },
+    weight=5.0
     )
 
-    right_gripper_close = RewTerm(
-        func=mdp.gripper_is_closed_reward,
-        params={
-            "object_cfg": SceneEntityCfg("object_right"),
-            "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"]),
-            "action_name": "right_gripper_action"
-        },
-        weight=5.0
+    right_gripper_grasped = RewTerm(
+    func=mdp.gripper_is_grasped_reward,
+    params={
+        "object_cfg": SceneEntityCfg("object_right"),
+        "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"]),
+        "action_name": "right_gripper_action",
+    },
+    weight=5.0
     )
 
     # left_object_goal_tracking = RewTerm(
@@ -388,10 +388,10 @@ class RewardsCfg:
     # )
 
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.005)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.0001)
     left_joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-0.0001,
+        weight=-0.01,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_joint1",
                                                                     "openarm_left_joint2",
                                                                     "openarm_left_joint3",
@@ -399,19 +399,19 @@ class RewardsCfg:
                                                                     "openarm_left_joint5",
                                                                     "openarm_left_joint6",
                                                                     "openarm_left_joint7",
-                                                                    #"openarm_left_finger.*",
+                                                                    "openarm_left_finger.*",
                                                                   ])},
     )
     
-    left_finger_vel = RewTerm(
-        func=mdp.joint_vel_l2,
-        weight=-0.001,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_finger.*"])},
-    )
+    # left_finger_vel = RewTerm(
+    #     func=mdp.joint_vel_l2,
+    #     weight=-0.001,
+    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_finger.*"])},
+    # )
 
     right_joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-0.0001,
+        weight=-0.01,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_joint1",
                                                                     "openarm_right_joint2",
                                                                     "openarm_right_joint3",
@@ -419,15 +419,15 @@ class RewardsCfg:
                                                                     "openarm_right_joint5",
                                                                     "openarm_right_joint6",
                                                                     "openarm_right_joint7",
-                                                                    #"openarm_right_finger.*",
+                                                                    "openarm_right_finger.*",
                                                                   ])},
     )
 
-    right_finger_vel = RewTerm(
-        func=mdp.joint_vel_l2,
-        weight=-0.001,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_finger.*"])},
-    )
+    # right_finger_vel = RewTerm(
+    #     func=mdp.joint_vel_l2,
+    #     weight=-0.001,
+    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_finger.*"])},
+    # )
 
 
 @configclass
@@ -453,17 +453,17 @@ class CurriculumCfg:
 
     action_rate = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "action_rate", "weight": -1e-1, "num_steps": 1e9},
+        params={"term_name": "action_rate", "weight": -1e-1, "num_steps": 5e6},
     )
 
     left_joint_vel = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "left_joint_vel", "weight": -1e-2, "num_steps": 1e9},
+        params={"term_name": "left_joint_vel", "weight": -1e-1, "num_steps": 1e9},
     )
 
     right_joint_vel = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "right_joint_vel", "weight": -1e-2, "num_steps": 1e9},
+        params={"term_name": "right_joint_vel", "weight": -1e-1, "num_steps": 1e9},
     )
 
     # reach_weight_left = CurrTerm(
