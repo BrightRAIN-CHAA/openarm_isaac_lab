@@ -47,7 +47,7 @@ gym.register(
 )
 
 gym.register(
-    id="Lift",
+    id="Lift_PLAY",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={

@@ -48,45 +48,54 @@ def gripper_is_grasped_reward(
     object_cfg: SceneEntityCfg, 
     ee_frame_cfg: SceneEntityCfg,
     action_name: str,
-    velocity_threshold: float = 0.05,
-    # 큐브(0.06)의 절반인 0.03보다 아주 살짝 큰 값으로 설정
-    single_gripper_threshold: float = 0.0305
+    # velocity_threshold: float = 0.05,
+    max_dist: float = 0.044,      # 완전히 열렸을 때 (0점)
+    min_dist: float = 0.03,     # 목표 닫힘 정도 (1점)
+    max_vel_threshold: float = 0.5,   # 최대 허용 속도 (이보다 빠르면 보상 0)
+    exp_scale: float = 1       # 지수 가파르기 (클수록 끝부분에서 점수가 확 오름)
 ) -> torch.Tensor:
-    # 1. 에셋 데이터 가져오기
+    # 1. 에셋 및 기본 데이터 가져오기
     object_asset: RigidObject = env.scene[object_cfg.name]
     ee_frame: FrameTransformer = env.scene[ee_frame_cfg.name]
     robot_asset: Articulation = env.scene["robot"]
     
-    # 2. 물체 위치 및 속도
-    cube_pos_w = object_asset.data.root_pos_w[:, 0:3]
-    cube_vel_w = object_asset.data.root_lin_vel_w[:, 0:3]
+    # 2. 액션 매니저에서 인덱스 추출
+    action_term = env.action_manager._terms.get(action_name)
+    if action_term is None:
+        return torch.zeros_like(object_asset.data.root_pos_w[:, 0])
     
-    # 3. End-Effector 위치 및 거리 계산
+    first_gripper_idx = action_term._joint_ids[0]
+    
+    # 3. 데이터 추출 (쉼표 제거 및 순서 조정)
+    cube_pos_w = object_asset.data.root_pos_w[:, 0:3]
+    # cube_vel_w = object_asset.data.root_lin_vel_w[:, 0:3]
+
     frame_idx = ee_frame_cfg.body_ids[0]
     ee_w = ee_frame.data.target_pos_w[:, frame_idx, :]
     dist = torch.norm(cube_pos_w - ee_w, dim=1)
     
-    # 4. 그리퍼 한쪽 관절 값 추출
-    action_term = env.action_manager._terms.get(action_name)
-    if action_term is None:
-        return torch.zeros_like(dist)
-    
-    # 여러 개의 그리퍼 관절 중 첫 번째 인덱스 하나만 사용 (어차피 대칭이므로)
-    first_gripper_idx = action_term._joint_ids[0]
-    # 부호가 마이너스일 수 있으므로 절대값을 취해줍니다.
-    single_gripper_pos = torch.abs(robot_asset.data.joint_pos[:, first_gripper_idx])
+    # 현재 위치 및 속도 데이터
+    curr_pos = robot_asset.data.joint_pos[:, first_gripper_idx]
+    gripper_vel = torch.abs(robot_asset.data.joint_vel[:, first_gripper_idx]) # 쉼표 제거 완료
 
-    # 5. 조건 판별 (한쪽 관절 기준)
-    is_near = dist < 0.01 
+    # 4. 정규화된 거리 및 지수 보상 계산
+    closure_ratio = (max_dist - curr_pos) / (max_dist - min_dist)
+    closure_ratio = torch.clamp(closure_ratio, min=0.0, max=1.0)
 
-    # 한쪽 관절이 0.0305보다 작으면 (즉, 안쪽으로 충분히 들어왔으면) 닫힌 것으로 간주
-    is_closed = single_gripper_pos < single_gripper_threshold
-    
-    # 물체가 튕겨 나가지 않고 정지해 있는지 확인
-    is_stable = torch.norm(cube_vel_w, dim=1) < velocity_threshold
-    
-    return (is_near & is_closed & is_stable).float()
-    
+    # 디바이스 일치를 위해 closure_ratio.device 사용
+    exp_scale_tensor = torch.tensor(exp_scale, device=closure_ratio.device)
+    closed_reward = (torch.exp(exp_scale_tensor * closure_ratio) - 1) / (torch.exp(exp_scale_tensor) - 1)
+
+    # 5. 조건 판별 및 속도 가중치
+    is_near_mask = (dist < 0.01).float()
+    # is_stable = torch.norm(cube_vel_w, dim=1) < velocity_threshold
+
+    # 선형 속도 가중치 계산
+    speed_factor = 1.0 - (gripper_vel / max_vel_threshold)
+    speed_factor = torch.clamp(speed_factor, min=0.3, max=1.0)
+
+    return is_near_mask * closed_reward * speed_factor
+
 # def gripper_is_closed_reward(
 #     env: ManagerBasedRLEnv, 
 #     object_cfg: SceneEntityCfg, 
@@ -127,6 +136,27 @@ def object_is_lifted(
     reward = torch.clamp( 1.11 * torch.tanh(scale * lift_height), min =0.0, max = 1.0) #1.11 * tanh(1.5) ≒ 1.0이 되도록
     
     return reward
+
+def bimanual_balance_reward(env, left_terms: list[str], right_terms: list[str]):
+    # 1. 이번 스텝에서 계산된 전체 보상 텐서를 가져옵니다.
+    # _step_reward는 보통 각 term의 인덱스나 이름으로 접근 가능한 구조입니다.
+    
+    left_total = 0.0
+    for term in left_terms:
+        term_idx = env.reward_manager._term_names.index(term)
+        raw_reward = env.reward_manager._step_reward[:, term_idx]
+        weight = env.reward_manager._term_cfgs[term_idx].weight
+        left_total += raw_reward * weight
+
+    right_total = 0.0
+    for term in right_terms:
+        term_idx = env.reward_manager._term_names.index(term)
+        raw_reward = env.reward_manager._step_reward[:, term_idx]
+        weight = env.reward_manager._term_cfgs[term_idx].weight
+        right_total += raw_reward * weight
+
+    # 2. 두 합계 중 최솟값 반환
+    return torch.min(left_total, right_total)
 
 # def object_goal_distance(
 #     env: ManagerBasedRLEnv,

@@ -331,7 +331,7 @@ class RewardsCfg:
             "table_height": 0.349,
             "object_cfg": SceneEntityCfg("object_left")
         },
-        weight=10.0
+        weight=30.0
     )
     right_lifting_object = RewTerm(
         func=mdp.object_is_lifted,
@@ -340,27 +340,36 @@ class RewardsCfg:
             "table_height": 0.349,
             "object_cfg": SceneEntityCfg("object_right")
         },
-        weight=10.0
+        weight=30.0
     )
 
     left_gripper_grasped = RewTerm(
-    func=mdp.gripper_is_grasped_reward,
-    params={
-        "object_cfg": SceneEntityCfg("object_left"),
-        "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"]),
-        "action_name": "left_gripper_action",
-    },
-    weight=5.0
+        func=mdp.gripper_is_grasped_reward,
+        params={
+            "object_cfg": SceneEntityCfg("object_left"),
+            "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"]),
+            "action_name": "left_gripper_action",
+        },
+        weight=10.0
     )
 
     right_gripper_grasped = RewTerm(
-    func=mdp.gripper_is_grasped_reward,
-    params={
-        "object_cfg": SceneEntityCfg("object_right"),
-        "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"]),
-        "action_name": "right_gripper_action",
-    },
-    weight=5.0
+        func=mdp.gripper_is_grasped_reward,
+        params={
+            "object_cfg": SceneEntityCfg("object_right"),
+            "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"]),
+            "action_name": "right_gripper_action",
+        },
+        weight=10.0
+    )
+
+    bimanual_min_balance = RewTerm(
+        func=mdp.bimanual_balance_reward,
+        params={
+            "left_terms": ["left_reaching_object", "left_lifting_object", "left_gripper_grasped"],
+            "right_terms": ["right_reaching_object", "right_lifting_object", "right_gripper_grasped"],
+        },
+        weight=1.0
     )
 
     # left_object_goal_tracking = RewTerm(
@@ -388,10 +397,10 @@ class RewardsCfg:
     # )
 
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.0001)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.005)
     left_joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-0.01,
+        weight=-0.001,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_joint1",
                                                                     "openarm_left_joint2",
                                                                     "openarm_left_joint3",
@@ -403,15 +412,15 @@ class RewardsCfg:
                                                                   ])},
     )
     
-    # left_finger_vel = RewTerm(
-    #     func=mdp.joint_vel_l2,
-    #     weight=-0.001,
-    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_finger.*"])},
-    # )
+    left_finger_vel = RewTerm(
+        func=mdp.joint_vel_l2,
+        weight=-0.01,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_finger.*"])},
+    )
 
     right_joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-0.01,
+        weight=-0.001,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_joint1",
                                                                     "openarm_right_joint2",
                                                                     "openarm_right_joint3",
@@ -423,11 +432,11 @@ class RewardsCfg:
                                                                   ])},
     )
 
-    # right_finger_vel = RewTerm(
-    #     func=mdp.joint_vel_l2,
-    #     weight=-0.001,
-    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_finger.*"])},
-    # )
+    right_finger_vel = RewTerm(
+        func=mdp.joint_vel_l2,
+        weight=-0.01,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_finger.*"])},
+    )
 
 
 @configclass
@@ -453,17 +462,17 @@ class CurriculumCfg:
 
     action_rate = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "action_rate", "weight": -1e-1, "num_steps": 5e6},
+        params={"term_name": "action_rate", "weight": -0.05, "num_steps": 2.5e8},
     )
 
     left_joint_vel = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "left_joint_vel", "weight": -1e-1, "num_steps": 1e9},
+        params={"term_name": "left_joint_vel", "weight": -0.05, "num_steps": 2.5e8},
     )
 
     right_joint_vel = CurrTerm(
         func=mdp.modify_reward_weight,
-        params={"term_name": "right_joint_vel", "weight": -1e-1, "num_steps": 1e9},
+        params={"term_name": "right_joint_vel", "weight": -0.05, "num_steps": 2.5e8},
     )
 
     # reach_weight_left = CurrTerm(
@@ -495,7 +504,7 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the lift environment."""
 
     # Scene settings
-    scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=4096, env_spacing=2.5)
+    scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=2048, env_spacing=2.5)
     # Basic settings
     observations: ObservationsCfg = ObservationsCfg()
     actions: ActionsCfg = ActionsCfg()
@@ -518,5 +527,5 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
 
         self.sim.physx.bounce_threshold_velocity = 0.01
         self.sim.physx.gpu_found_lost_aggregate_pairs_capacity = 1024 * 1024 * 4
-        self.sim.physx.gpu_total_aggregate_pairs_capacity = 16 * 1024
+        self.sim.physx.gpu_total_aggregate_pairs_capacity = 64 * 1024
         self.sim.physx.friction_correlation_distance = 0.00625

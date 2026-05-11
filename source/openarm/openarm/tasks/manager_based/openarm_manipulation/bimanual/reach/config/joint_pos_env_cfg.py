@@ -69,8 +69,8 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
                     "openarm_right_joint5": 0.0,
                     "openarm_right_joint6": 0.0,
                     "openarm_right_joint7": 0.0,
-                    "openarm_left_finger_joint.*": 0.0,
-                    "openarm_right_finger_joint.*": 0.0,
+                    "openarm_left_finger_joint.*": 0.044,
+                    "openarm_right_finger_joint.*": 0.044,
                 },  # Close the gripper
             ),
         )
@@ -86,7 +86,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
                 "openarm_left_joint5",
                 "openarm_left_joint6",
                 "openarm_left_joint7",
-                "openarm_left_finger_joint.*",
+                # "openarm_left_finger_joint.*",
             ],
             scale=0.5,
             use_default_offset=True,
@@ -102,7 +102,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
                 "openarm_right_joint5",
                 "openarm_right_joint6",
                 "openarm_right_joint7",
-                "openarm_right_finger_joint.*",
+                # "openarm_right_finger_joint.*",
             ],
             scale=0.5,
             use_default_offset=True,
@@ -112,14 +112,14 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             asset_name="robot",
             joint_names=["openarm_left_finger_joint.*"],
             open_command_expr={"openarm_left_finger_joint.*": 0.044},
-            close_command_expr={"openarm_left_finger_joint.*": 0.025},
+            close_command_expr={"openarm_left_finger_joint.*": 0.0},
         )
 
         self.actions.right_gripper_action = mdp.BinaryJointPositionActionCfg(
             asset_name="robot",
             joint_names=["openarm_right_finger_joint.*"],
             open_command_expr={"openarm_right_finger_joint.*": 0.044},
-            close_command_expr={"openarm_right_finger_joint.*": 0.025},
+            close_command_expr={"openarm_right_finger_joint.*": 0.0},
         )
         
         # Set the body name for the end effector_tcp
@@ -136,7 +136,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             ),
             spawn=UsdFileCfg(
                 usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                scale=(0.8, 0.8, 0.8), #큐브 크기 한 변에 0.06
+                scale=(1, 1, 1), #큐브 크기 한 변에 0.06
                 rigid_props=RigidBodyPropertiesCfg(
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,
@@ -156,7 +156,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             ),
             spawn=UsdFileCfg(
                 usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                scale=(0.8, 0.8, 0.8),
+                scale=(1, 1, 1),
                 rigid_props=RigidBodyPropertiesCfg(
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,
@@ -180,12 +180,12 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/openarm_left_ee_tcp",
                     name="openarm_left_ee_tcp",
-                    offset=OffsetCfg(pos=(0.0, 0.0, -0.035)),
+                    offset=OffsetCfg(pos=(0.0, 0.0, -0.03)),
                 ),
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/openarm_right_ee_tcp",
                     name="openarm_right_ee_tcp",
-                    offset=OffsetCfg(pos=(0.0, 0.0, -0.035)),
+                    offset=OffsetCfg(pos=(0.0, 0.0, -0.03)),
                 ),
             ],
         )
