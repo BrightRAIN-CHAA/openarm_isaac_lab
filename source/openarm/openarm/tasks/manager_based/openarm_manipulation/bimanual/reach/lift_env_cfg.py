@@ -519,7 +519,7 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 2
-        self.episode_length_s = 12.0
+        self.episode_length_s = 22.0
         self.viewer.eye = (3.5, 3.5, 3.5)
         # simulation settings
         self.sim.dt = 0.01  # 100Hz
@@ -529,4 +529,3 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.physx.gpu_found_lost_aggregate_pairs_capacity = 1024 * 1024 * 4
         self.sim.physx.gpu_total_aggregate_pairs_capacity = 64 * 1024
         self.sim.physx.friction_correlation_distance = 0.00625
-# 확인
