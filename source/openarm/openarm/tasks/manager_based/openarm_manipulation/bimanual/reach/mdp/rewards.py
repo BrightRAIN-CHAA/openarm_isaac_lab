@@ -50,7 +50,7 @@ def gripper_is_grasped_reward(
     action_name: str,
     # velocity_threshold: float = 0.05,
     max_dist: float = 0.044,      # 완전히 열렸을 때 (0점)
-    min_dist: float = 0.03,     # 목표 닫힘 정도 (1점)
+    min_dist: float = 0.028,     # 목표 닫힘 정도 (1점)
     max_vel_threshold: float = 0.5,   # 최대 허용 속도 (이보다 빠르면 보상 0)
     exp_scale: float = 1       # 지수 가파르기 (클수록 끝부분에서 점수가 확 오름)
 ) -> torch.Tensor:
@@ -136,27 +136,6 @@ def object_is_lifted(
     reward = torch.clamp( 1.11 * torch.tanh(scale * lift_height), min =0.0, max = 1.0) #1.11 * tanh(1.5) ≒ 1.0이 되도록
     
     return reward
-
-def bimanual_balance_reward(env, left_terms: list[str], right_terms: list[str]):
-    # 1. 이번 스텝에서 계산된 전체 보상 텐서를 가져옵니다.
-    # _step_reward는 보통 각 term의 인덱스나 이름으로 접근 가능한 구조입니다.
-    
-    left_total = 0.0
-    for term in left_terms:
-        term_idx = env.reward_manager._term_names.index(term)
-        raw_reward = env.reward_manager._step_reward[:, term_idx]
-        weight = env.reward_manager._term_cfgs[term_idx].weight
-        left_total += raw_reward * weight
-
-    right_total = 0.0
-    for term in right_terms:
-        term_idx = env.reward_manager._term_names.index(term)
-        raw_reward = env.reward_manager._step_reward[:, term_idx]
-        weight = env.reward_manager._term_cfgs[term_idx].weight
-        right_total += raw_reward * weight
-
-    # 2. 두 합계 중 최솟값 반환
-    return torch.min(left_total, right_total)
 
 # def object_goal_distance(
 #     env: ManagerBasedRLEnv,

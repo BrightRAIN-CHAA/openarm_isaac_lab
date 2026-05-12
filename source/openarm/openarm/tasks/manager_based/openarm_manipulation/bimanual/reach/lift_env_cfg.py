@@ -311,7 +311,7 @@ class RewardsCfg:
             "object_cfg": SceneEntityCfg("object_left"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"])
         },
-        weight=3.0
+        weight=2.0
     )
 
     right_reaching_object = RewTerm(
@@ -321,26 +321,7 @@ class RewardsCfg:
             "object_cfg": SceneEntityCfg("object_right"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"])
         },
-        weight=3.0
-    )
-
-    left_lifting_object = RewTerm(
-        func=mdp.object_is_lifted,
-        params={
-            "target_height": 0.1, #책상으로부터 높이
-            "table_height": 0.349,
-            "object_cfg": SceneEntityCfg("object_left")
-        },
-        weight=30.0
-    )
-    right_lifting_object = RewTerm(
-        func=mdp.object_is_lifted,
-        params={
-            "target_height": 0.1, #책상으로부터 높이
-            "table_height": 0.349,
-            "object_cfg": SceneEntityCfg("object_right")
-        },
-        weight=30.0
+        weight=2.0
     )
 
     left_gripper_grasped = RewTerm(
@@ -350,7 +331,7 @@ class RewardsCfg:
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"]),
             "action_name": "left_gripper_action",
         },
-        weight=10.0
+        weight=3.0
     )
 
     right_gripper_grasped = RewTerm(
@@ -360,16 +341,26 @@ class RewardsCfg:
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"]),
             "action_name": "right_gripper_action",
         },
-        weight=10.0
+        weight=3.0
     )
 
-    bimanual_min_balance = RewTerm(
-        func=mdp.bimanual_balance_reward,
+    left_lifting_object = RewTerm(
+        func=mdp.object_is_lifted,
         params={
-            "left_terms": ["left_reaching_object", "left_lifting_object", "left_gripper_grasped"],
-            "right_terms": ["right_reaching_object", "right_lifting_object", "right_gripper_grasped"],
+            "target_height": 0.8, #책상으로부터 높이
+            "table_height": 0.349,
+            "object_cfg": SceneEntityCfg("object_left")
         },
-        weight=1.0
+        weight=3.0
+    )
+    right_lifting_object = RewTerm(
+        func=mdp.object_is_lifted,
+        params={
+            "target_height": 0.8, #책상으로부터 높이
+            "table_height": 0.349,
+            "object_cfg": SceneEntityCfg("object_right")
+        },
+        weight=3.0
     )
 
     # left_object_goal_tracking = RewTerm(
@@ -397,10 +388,10 @@ class RewardsCfg:
     # )
 
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.005)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.05)
     left_joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-0.001,
+        weight=-0.05,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_joint1",
                                                                     "openarm_left_joint2",
                                                                     "openarm_left_joint3",
@@ -414,13 +405,13 @@ class RewardsCfg:
     
     left_finger_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-0.01,
+        weight=-0.05,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_finger.*"])},
     )
 
     right_joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-0.001,
+        weight=-0.05,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_joint1",
                                                                     "openarm_right_joint2",
                                                                     "openarm_right_joint3",
@@ -434,7 +425,7 @@ class RewardsCfg:
 
     right_finger_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-0.01,
+        weight=-0.05,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_finger.*"])},
     )
 
@@ -504,7 +495,7 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the lift environment."""
 
     # Scene settings
-    scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=2048, env_spacing=2.5)
+    scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=1024, env_spacing=2.5)
     # Basic settings
     observations: ObservationsCfg = ObservationsCfg()
     actions: ActionsCfg = ActionsCfg()
@@ -519,7 +510,7 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 2
-        self.episode_length_s = 12.0
+        self.episode_length_s = 8.0
         self.viewer.eye = (3.5, 3.5, 3.5)
         # simulation settings
         self.sim.dt = 0.01  # 100Hz

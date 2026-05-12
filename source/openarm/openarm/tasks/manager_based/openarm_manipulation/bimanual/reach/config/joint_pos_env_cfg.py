@@ -112,14 +112,14 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             asset_name="robot",
             joint_names=["openarm_left_finger_joint.*"],
             open_command_expr={"openarm_left_finger_joint.*": 0.044},
-            close_command_expr={"openarm_left_finger_joint.*": 0.0},
+            close_command_expr={"openarm_left_finger_joint.*": 0.028},
         )
 
         self.actions.right_gripper_action = mdp.BinaryJointPositionActionCfg(
             asset_name="robot",
             joint_names=["openarm_right_finger_joint.*"],
             open_command_expr={"openarm_right_finger_joint.*": 0.044},
-            close_command_expr={"openarm_right_finger_joint.*": 0.0},
+            close_command_expr={"openarm_right_finger_joint.*": 0.028},
         )
         
         # Set the body name for the end effector_tcp
