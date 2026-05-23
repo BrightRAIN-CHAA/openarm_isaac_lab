@@ -32,6 +32,8 @@ class BimanualLiftIPPOEnv(ManagerBasedRLEnv):
             "left_reaching_object",
             "left_lifting_object",
             "left_gripper_grasped",
+            "left_near_object_ee_velocity",
+            "left_action_rate",
             "left_joint_vel",
             "left_finger_vel",
         ),
@@ -39,6 +41,8 @@ class BimanualLiftIPPOEnv(ManagerBasedRLEnv):
             "right_reaching_object",
             "right_lifting_object",
             "right_gripper_grasped",
+            "right_near_object_ee_velocity",
+            "right_action_rate",
             "right_joint_vel",
             "right_finger_vel",
         ),
@@ -73,7 +77,8 @@ class BimanualLiftIPPOEnv(ManagerBasedRLEnv):
 
     def step(self, actions):
         if not isinstance(actions, Mapping):
-            return super().step(actions)
+            observations, reward, terminated, truncated, extras = super().step(actions)
+            return observations, reward, terminated, truncated, extras
 
         observations, reward, terminated, truncated, extras = super().step(self._merge_agent_actions(actions))
         return (
@@ -145,7 +150,6 @@ class BimanualLiftIPPOEnv(ManagerBasedRLEnv):
     def _agent_rewards(self, fallback_reward: torch.Tensor) -> dict[str, torch.Tensor]:
         term_names = getattr(self.reward_manager, "_term_names", [])
         step_reward = getattr(self.reward_manager, "_step_reward", None)
-        term_cfgs = getattr(self.reward_manager, "_term_cfgs", [])
         if step_reward is None:
             return {agent: fallback_reward for agent in self.possible_agents}
 
@@ -157,7 +161,7 @@ class BimanualLiftIPPOEnv(ManagerBasedRLEnv):
                 if term_name not in term_names:
                     continue
                 term_idx = term_names.index(term_name)
-                agent_reward += step_reward[:, term_idx] * term_cfgs[term_idx].weight
+                agent_reward += step_reward[:, term_idx] * self.step_dt
                 found_term = True
             rewards[agent] = agent_reward if found_term else fallback_reward
         return rewards

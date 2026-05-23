@@ -31,6 +31,7 @@ from isaaclab.assets.articulation import ArticulationCfg
 
 from isaaclab.assets import RigidObjectCfg
 from isaaclab.sensors import FrameTransformerCfg
+from isaaclab.sensors import ContactSensorCfg
 from isaaclab.sensors.frame_transformer.frame_transformer_cfg import OffsetCfg
 from isaaclab.sim.schemas.schemas_cfg import RigidBodyPropertiesCfg
 from isaaclab.sim.spawners.from_files.from_files_cfg import UsdFileCfg
@@ -65,7 +66,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
                     "openarm_right_joint1": 0.0,
                     "openarm_right_joint2": 0.0,
                     "openarm_right_joint3": 0.0,
-                    "openarm_right_joint4": 2.0,
+                    "openarm_right_joint4": 0.0,
                     "openarm_right_joint5": 0.0,
                     "openarm_right_joint6": 0.0,
                     "openarm_right_joint7": 0.0,
@@ -104,7 +105,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
                 "openarm_right_joint7",
                 # "openarm_right_finger_joint.*",
             ],
-            scale=0.5,
+            scale=0.0,
             use_default_offset=True,
         )
 
@@ -112,14 +113,14 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             asset_name="robot",
             joint_names=["openarm_left_finger_joint.*"],
             open_command_expr={"openarm_left_finger_joint.*": 0.044},
-            close_command_expr={"openarm_left_finger_joint.*": 0.028},
+            close_command_expr={"openarm_left_finger_joint.*": 0.025},
         )
 
         self.actions.right_gripper_action = mdp.BinaryJointPositionActionCfg(
             asset_name="robot",
             joint_names=["openarm_right_finger_joint.*"],
             open_command_expr={"openarm_right_finger_joint.*": 0.044},
-            close_command_expr={"openarm_right_finger_joint.*": 0.028},
+            close_command_expr={"openarm_right_finger_joint.*": 0.044},
         )
         
         # Set the body name for the end effector_tcp
@@ -128,11 +129,44 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
         self.commands.left_object_pose.ranges.pitch = (math.pi / 2, math.pi / 2) #로봇 손의 pitch(위아래로 기울어지는 각도) 목표값을 90 degree
         self.commands.right_object_pose.ranges.pitch = (math.pi / 2, math.pi / 2)
 
+        self.scene.robot.spawn.activate_contact_sensors = True
+        
+        # Filtered contact sensors must each target a single rigid body.
+        self.scene.left_left_finger_contact = ContactSensorCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/openarm_left_left_finger",
+            update_period=0.0,
+            history_length=6,
+            debug_vis=False,
+            filter_prim_paths_expr=["{ENV_REGEX_NS}/ObjectLeft"],
+        )
+        self.scene.left_right_finger_contact = ContactSensorCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/openarm_left_right_finger",
+            update_period=0.0,
+            history_length=6,
+            debug_vis=False,
+            filter_prim_paths_expr=["{ENV_REGEX_NS}/ObjectLeft"],
+        )
+
+        self.scene.right_left_finger_contact = ContactSensorCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/openarm_right_left_finger",
+            update_period=0.0,
+            history_length=6,
+            debug_vis=False,
+            filter_prim_paths_expr=["{ENV_REGEX_NS}/ObjectRight"],
+        )
+        self.scene.right_right_finger_contact = ContactSensorCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/openarm_right_right_finger",
+            update_period=0.0,
+            history_length=6,
+            debug_vis=False,
+            filter_prim_paths_expr=["{ENV_REGEX_NS}/ObjectRight"],
+        )
+
         # Set Left Cube as object
         self.scene.object_left = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/ObjectLeft",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.4, 0.3, 0.35], rot=[1, 0, 0, 0] # y좌표를 0.3으로 설정하여 왼쪽에 배치, 초기 위치 고정
+                pos=[0.4, 0.3, 0.3482], rot=[1, 0, 0, 0] # y좌표를 0.3으로 설정하여 왼쪽에 배치, 초기 위치 고정
             ),
             spawn=UsdFileCfg(
                 usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
@@ -174,7 +208,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
         marker_cfg.prim_path = "/Visuals/FrameTransformer"
         self.scene.ee_frame = FrameTransformerCfg(
             prim_path="{ENV_REGEX_NS}/Robot/openarm_body_link",
-            debug_vis=True,
+            debug_vis=False,
             visualizer_cfg=marker_cfg,
             target_frames=[
                 FrameTransformerCfg.FrameCfg(
@@ -196,7 +230,7 @@ class OpenArmCubeLiftEnvCfg_PLAY(OpenArmCubeLiftEnvCfg):
         # post init of parent
         super().__post_init__()
         # make a smaller scene for play
-        self.scene.num_envs = 50
+        self.scene.num_envs = 1
         self.scene.env_spacing = 2.5
         # disable randomization for play
         self.observations.policy.enable_corruption = False
