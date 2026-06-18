@@ -172,7 +172,7 @@ class OpenArmCubeLiftEnvCfg(LiftEnvCfg):
             ),
             spawn=UsdFileCfg(
                 usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                scale=(1, 1, 1), #큐브 크기 한 변에 0.06
+                scale=(1, 1, 1),
                 rigid_props=RigidBodyPropertiesCfg(
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,

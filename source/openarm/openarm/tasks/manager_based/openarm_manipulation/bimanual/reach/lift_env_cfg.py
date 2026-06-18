@@ -39,6 +39,7 @@ from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 from isaaclab.sensors.frame_transformer.frame_transformer_cfg import FrameTransformerCfg
 from isaaclab.sim.spawners.from_files.from_files_cfg import GroundPlaneCfg, UsdFileCfg
 from source.openarm.openarm.tasks.manager_based.openarm_manipulation.assets.table_cfg import TABLE_USD_PATH #table usd adress
+from source.openarm.openarm.tasks.manager_based.openarm_manipulation.assets.container_cfg import CONTAINER_USD_PATH
 
 from isaaclab.managers import SceneEntityCfg
 from . import mdp
@@ -79,6 +80,24 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
         ),
     )
 
+    # Container (큐브를 넣을 바구니)
+    container = AssetBaseCfg(
+        prim_path="{ENV_REGEX_NS}/Container",
+        init_state=AssetBaseCfg.InitialStateCfg(
+            pos=[0.15, 0.0, 0.32],
+            rot=[0.707, 0, 0, -0.707]
+        ),
+        spawn=UsdFileCfg(
+            usd_path=CONTAINER_USD_PATH,
+            scale = (1.5, 0.4, 1.0),
+            rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                kinematic_enabled=True,  # 로봇이 부딪혀도 바구니가 날아가지 않게 고정
+                disable_gravity=True
+            ),
+            collision_props=sim_utils.CollisionPropertiesCfg(collision_enabled=True), # 큐브와 충돌(담기) 가능하게 설정
+        ),
+    )
+
     # plane
     plane = AssetBaseCfg(
         prim_path="/World/GroundPlane",
@@ -100,16 +119,16 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
 @configclass
 class CommandsCfg:
     """Command terms for the MDP."""
-
+    
     left_object_pose = mdp.UniformPoseCommandCfg(
         asset_name="robot",
-        body_name=MISSING,   # will be set by agent env cfg
-        resampling_time_range=(99999.0, 99999.0),
-        debug_vis=False,
+        body_name=MISSING,   #로봇의 어디 부위를 기준으로 할 것인지, joint_pos_env.py에서 설정
+        resampling_time_range=(8.0, 8.0), #목표 지점 리샘플링 주기, 현재 에피소드 8초와 동일
+        debug_vis=True, #목표지점 마커로 표시
         ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(0.3, 0.3),
-            pos_y=(0.1, 0.1),
-            pos_z=(0.65, 0.65),
+            pos_x=(0.1, 0.2),
+            pos_y=(0.1, 0.2),
+            pos_z=(0.5, 0.5),
             roll=(0.0, 0.0),
             pitch=(0.0, 0.0),
             yaw=(0.0, 0.0),
@@ -118,13 +137,13 @@ class CommandsCfg:
 
     right_object_pose = mdp.UniformPoseCommandCfg(
         asset_name="robot",
-        body_name=MISSING,   # will be set by agent env cfg
-        resampling_time_range=(99999.0, 99999.0),
-        debug_vis=False,
+        body_name=MISSING,
+        resampling_time_range=(8.0, 8.0),
+        debug_vis=True,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(0.3, 0.3),
-            pos_y=(-0.1, -0.1),
-            pos_z=(0.65, 0.65),
+            pos_x=(0.1, 0.2),
+            pos_y=(-0.2, -0.1),
+            pos_z=(0.5, 0.5),
             roll=(0.0, 0.0),
             pitch=(0.0, 0.0),
             yaw=(0.0, 0.0),
@@ -188,7 +207,7 @@ class ObservationsCfg:
         )
 
         left_object_position = ObsTerm(
-            func=mdp.object_position_in_robot_root_frame,
+            func=mdp.object_position_in_robot_root_frame, #로봇 body link 기준, 상대좌표
             params={"object_cfg": SceneEntityCfg("object_left")}
         )
         right_object_position = ObsTerm(
@@ -287,7 +306,7 @@ class EventCfg:
 @configclass
 class RewardsCfg:
     """Reward terms for the MDP."""
-    # left arm reward terms
+
     left_reaching_object = RewTerm(
         func=mdp.object_ee_distance,
         params={
@@ -309,15 +328,6 @@ class RewardsCfg:
         },
         weight=1.0
     )
-
-    # left_lifted_gate = RewTerm(
-    #     func=mdp.object_lifted_gate,
-    #     params={
-    #         "minimal_lift_height": 0.04,
-    #         "object_cfg": SceneEntityCfg("object_left"),
-    #     },
-    #     weight=5.0
-    # )
 
     left_object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
@@ -363,15 +373,6 @@ class RewardsCfg:
         },
         weight=1.0
     )
-
-    # right_lifted_gate = RewTerm(
-    #     func=mdp.object_lifted_gate,
-    #     params={
-    #         "minimal_lift_height": 0.04,
-    #         "object_cfg": SceneEntityCfg("object_right"),
-    #     },
-    #     weight=5.0
-    # )
 
     right_object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
@@ -428,6 +429,8 @@ class RewardsCfg:
         },
     )
 
+
+
 @configclass
 class TerminationsCfg:
     """Termination terms for the MDP."""
@@ -449,7 +452,7 @@ class TerminationsCfg:
 class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
-    left_gripper_grasped_bonus = CurrTerm(
+   left_gripper_grasped_bonus = CurrTerm(
         func=mdp.linear_modify_reward_weight,
         params={
             "term_name": "left_gripper_grasped_bonus",
@@ -514,7 +517,7 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the lift environment."""
 
     # Scene settings
-    scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=512, env_spacing=2.5)
+    scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=2048, env_spacing=2.5)
     # Basic settings
     observations: ObservationsCfg = ObservationsCfg()
     actions: ActionsCfg = ActionsCfg()
@@ -529,13 +532,13 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 2
-        self.episode_length_s = 6.0
+        self.episode_length_s = 8.0
         self.viewer.eye = (3.5, 3.5, 3.5)
         # simulation settings
         self.sim.dt = 0.01  # 100Hz
         self.sim.render_interval = self.decimation
 
         self.sim.physx.bounce_threshold_velocity = 0.01
-        self.sim.physx.gpu_found_lost_aggregate_pairs_capacity = 1024 * 1024 * 4
+        self.sim.physx.gpu_found_lost_aggregate_pairs_capacity = 1024 * 1024 * 8
         self.sim.physx.gpu_total_aggregate_pairs_capacity = 64 * 1024
         self.sim.physx.friction_correlation_distance = 0.00625
