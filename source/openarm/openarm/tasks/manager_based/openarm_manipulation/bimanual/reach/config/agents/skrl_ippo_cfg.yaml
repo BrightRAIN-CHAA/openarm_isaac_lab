@@ -67,5 +67,5 @@ agent:
 
 trainer:
   class: SequentialTrainer
-  timesteps: 500000 # 로봇 1대당 진행되는 스텝 수 (약 625 에피소드)
+  timesteps: 250000 # 로봇 1대당 진행되는 스텝 수 (약 625 에피소드)
   environment_info: log

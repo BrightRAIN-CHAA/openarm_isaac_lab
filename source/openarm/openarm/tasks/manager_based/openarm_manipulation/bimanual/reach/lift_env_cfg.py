@@ -258,7 +258,7 @@ class EventCfg:
         mode="reset",
          params={
             "pose_range": {
-                "x": (0.2, 0.4),
+                "x": (0.3, 0.5),
                 "y": (0.1, 0.4),
                 "z": (0, 0),
                 "roll": (0.0, 0.0),
@@ -275,7 +275,7 @@ class EventCfg:
         mode="reset",
         params={
             "pose_range": {
-                "x": (0.2, 0.4),
+                "x": (0.3, 0.5),
                 "y": (-0.4, -0.1),
                 "z": (0, 0),
                 "roll": (0.0, 0.0),
@@ -452,59 +452,59 @@ class TerminationsCfg:
 class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
-   left_gripper_grasped_bonus = CurrTerm(
-        func=mdp.linear_modify_reward_weight,
-        params={
-            "term_name": "left_gripper_grasped_bonus",
-            "weight": 5.0,
-            "num_steps": 500_000,
-        },
-    )
+    # left_gripper_grasped_bonus = CurrTerm(
+    #     func=mdp.linear_modify_reward_weight,
+    #     params={
+    #         "term_name": "left_gripper_grasped_bonus",
+    #         "weight": 5.0,
+    #         "num_steps": 500_000,
+    #     },
+    # )
 
-    left_action_rate = CurrTerm(
-        func=mdp.modify_reward_weight,
-        params={
-            "term_name": "left_action_rate",
-            "weight": -1.0,
-            "num_steps": 20_000,
-        },
-    )
+    # left_action_rate = CurrTerm(
+    #     func=mdp.modify_reward_weight,
+    #     params={
+    #         "term_name": "left_action_rate",
+    #         "weight": -1e-2,
+    #         "num_steps": 20_000,
+    #     },
+    # )
 
-    left_joint_vel = CurrTerm(
-        func=mdp.modify_reward_weight,
-        params={
-            "term_name": "left_joint_vel",
-            "weight": -0.5,
-            "num_steps": 20_000,
-        },
-    )
+    # left_joint_vel = CurrTerm(
+    #     func=mdp.modify_reward_weight,
+    #     params={
+    #         "term_name": "left_joint_vel",
+    #         "weight": -0.5,
+    #         "num_steps": 20_000,
+    #     },
+    # )
 
-    right_gripper_grasped_bonus = CurrTerm(
-        func=mdp.linear_modify_reward_weight,
-        params={
-            "term_name": "right_gripper_grasped_bonus",
-            "weight": 5.0,
-            "num_steps": 500_000,
-        },
-    )
+    # right_gripper_grasped_bonus = CurrTerm(
+    #     func=mdp.linear_modify_reward_weight,
+    #     params={
+    #         "term_name": "right_gripper_grasped_bonus",
+    #         "weight": 5.0,
+    #         "num_steps": 500_000,
+    #     },
+    # )
 
-    right_action_rate = CurrTerm(
-        func=mdp.modify_reward_weight,
-        params={
-            "term_name": "right_action_rate",
-            "weight": -1.0,
-            "num_steps": 20_000,
-        },
-    )
+    # right_action_rate = CurrTerm(
+    #     func=mdp.modify_reward_weight,
+    #     params={
+    #         "term_name": "right_action_rate",
+    #         "weight": -1e-2,
+    #         "num_steps": 20_000,
+    #     },
+    # )
 
-    right_joint_vel = CurrTerm(
-        func=mdp.modify_reward_weight,
-        params={
-            "term_name": "right_joint_vel",
-            "weight": -0.5,
-            "num_steps": 20_000,
-        },
-    )
+    # right_joint_vel = CurrTerm(
+    #     func=mdp.modify_reward_weight,
+    #     params={
+    #         "term_name": "right_joint_vel",
+    #         "weight": -0.5,
+    #         "num_steps": 20_000,
+    #     },
+    # )
 
 
 ##
