@@ -452,7 +452,7 @@ class TerminationsCfg:
 class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
-   left_gripper_grasped_bonus = CurrTerm(
+    left_gripper_grasped_bonus = CurrTerm(
         func=mdp.linear_modify_reward_weight,
         params={
             "term_name": "left_gripper_grasped_bonus",
