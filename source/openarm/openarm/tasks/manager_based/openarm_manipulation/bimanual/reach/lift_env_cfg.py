@@ -100,16 +100,16 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
 @configclass
 class CommandsCfg:
     """Command terms for the MDP."""
-    
+
     left_object_pose = mdp.UniformPoseCommandCfg(
         asset_name="robot",
         body_name=MISSING,   # will be set by agent env cfg
         resampling_time_range=(99999.0, 99999.0),
         debug_vis=False,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(0.1, 0.2),
-            pos_y=(0.1, 0.2),
-            pos_z=(0.5, 0.5),
+            pos_x=(0.3, 0.3),
+            pos_y=(0.1, 0.1),
+            pos_z=(0.65, 0.65),
             roll=(0.0, 0.0),
             pitch=(0.0, 0.0),
             yaw=(0.0, 0.0),
@@ -122,9 +122,9 @@ class CommandsCfg:
         resampling_time_range=(99999.0, 99999.0),
         debug_vis=False,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(0.1, 0.2),
-            pos_y=(-0.2, -0.1),
-            pos_z=(0.5, 0.5),
+            pos_x=(0.3, 0.3),
+            pos_y=(-0.1, -0.1),
+            pos_z=(0.65, 0.65),
             roll=(0.0, 0.0),
             pitch=(0.0, 0.0),
             yaw=(0.0, 0.0),
@@ -159,15 +159,7 @@ class ObservationsCfg:
         left_joint_pos = ObsTerm(
             func=mdp.joint_pos_rel,
             params={
-                "asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_joint1",
-                                                                    "openarm_left_joint2",
-                                                                    "openarm_left_joint3",
-                                                                    "openarm_left_joint4",
-                                                                    "openarm_left_joint5",
-                                                                    "openarm_left_joint6",
-                                                                    "openarm_left_joint7",
-                                                                    "openarm_left_finger.*",
-                                                                  ])
+                "asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_joint.*", "openarm_left_finger.*"])
             },
             # noise=Unoise(n_min=-0.01, n_max=0.01),
         )
@@ -175,15 +167,7 @@ class ObservationsCfg:
         right_joint_pos = ObsTerm(
             func=mdp.joint_pos_rel,
             params={
-                "asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_joint1",
-                                                                    "openarm_right_joint2",
-                                                                    "openarm_right_joint3",
-                                                                    "openarm_right_joint4",
-                                                                    "openarm_right_joint5",
-                                                                    "openarm_right_joint6",
-                                                                    "openarm_right_joint7",
-                                                                    "openarm_right_finger.*",
-                                                                  ])
+                "asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_joint.*", "openarm_right_finger.*"])
             },
             # noise=Unoise(n_min=-0.01, n_max=0.01),
         )
@@ -191,30 +175,14 @@ class ObservationsCfg:
         left_joint_vel = ObsTerm(
             func=mdp.joint_vel_rel,
             params={
-                "asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_joint1",
-                                                                    "openarm_left_joint2",
-                                                                    "openarm_left_joint3",
-                                                                    "openarm_left_joint4",
-                                                                    "openarm_left_joint5",
-                                                                    "openarm_left_joint6",
-                                                                    "openarm_left_joint7",
-                                                                    "openarm_left_finger.*",
-                                                                  ])
+                "asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_joint.*", "openarm_left_finger.*"])
             },
             # noise=Unoise(n_min=-0.01, n_max=0.01),
         )
         right_joint_vel = ObsTerm(
             func=mdp.joint_vel_rel,
             params={
-                "asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_joint1",
-                                                                    "openarm_right_joint2",
-                                                                    "openarm_right_joint3",
-                                                                    "openarm_right_joint4",
-                                                                    "openarm_right_joint5",
-                                                                    "openarm_right_joint6",
-                                                                    "openarm_right_joint7",
-                                                                    "openarm_right_finger.*",
-                                                                  ])
+                "asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_joint.*", "openarm_right_finger.*"])
             },
             # noise=Unoise(n_min=-0.01, n_max=0.01),
         )
@@ -271,8 +239,8 @@ class EventCfg:
         mode="reset",
          params={
             "pose_range": {
-                "x": (0, 0), 
-                "y": (0, 0), 
+                "x": (0.2, 0.4),
+                "y": (0.1, 0.4),
                 "z": (0, 0),
                 "roll": (0.0, 0.0),
                 "pitch": (0.0, 0.0),
@@ -288,8 +256,8 @@ class EventCfg:
         mode="reset",
         params={
             "pose_range": {
-                "x": (0, 0), 
-                "y": (0, 0), 
+                "x": (0.2, 0.4),
+                "y": (-0.4, -0.1),
                 "z": (0, 0),
                 "roll": (0.0, 0.0),
                 "pitch": (0.0, 0.0),
@@ -319,163 +287,146 @@ class EventCfg:
 @configclass
 class RewardsCfg:
     """Reward terms for the MDP."""
-
+    # left arm reward terms
     left_reaching_object = RewTerm(
         func=mdp.object_ee_distance,
         params={
-            "std": 0.03,
+            "std": 0.1,
             "object_cfg": SceneEntityCfg("object_left"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"])
         },
         weight=2.0
     )
 
-    right_reaching_object = RewTerm(
-        func=mdp.object_ee_distance,
-        params={
-            "std": 0.03,
-            "object_cfg": SceneEntityCfg("object_right"),
-            "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"])
-        },
-        weight=0.0
-    )
-
-    left_gripper_grasped = RewTerm(
+    left_gripper_grasped_bonus = RewTerm(
         func=mdp.gripper_is_grasped_reward,
         params={
             "object_cfg": SceneEntityCfg("object_left"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"]),
             "action_name": "left_gripper_action",
+            "contact_force_threshold": 20.0,
+            "near_distance_threshold": 0.02,
         },
-        weight=4.0
+        weight=1.0
     )
 
-    right_gripper_grasped = RewTerm(
+    # left_lifted_gate = RewTerm(
+    #     func=mdp.object_lifted_gate,
+    #     params={
+    #         "minimal_lift_height": 0.04,
+    #         "object_cfg": SceneEntityCfg("object_left"),
+    #     },
+    #     weight=5.0
+    # )
+
+    left_object_goal_tracking = RewTerm(
+        func=mdp.object_goal_distance,
+        params={
+            "std": 0.3,
+            "command_name": "left_object_pose",
+            "minimal_lift_height": 0.04,
+            "object_cfg": SceneEntityCfg("object_left"),
+        },
+        weight=15.0
+    )
+
+    left_object_goal_tracking_fine_grained = RewTerm(
+        func=mdp.object_goal_distance,
+        params={
+            "std": 0.1,
+            "command_name": "left_object_pose",
+            "minimal_lift_height": 0.04,
+            "object_cfg": SceneEntityCfg("object_left"),
+        },
+        weight=5.0
+    )
+
+    # right arm reward terms
+    right_reaching_object = RewTerm(
+        func=mdp.object_ee_distance,
+        params={
+            "std": 0.1,
+            "object_cfg": SceneEntityCfg("object_right"),
+            "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"])
+        },
+        weight=2.0
+    )
+
+    right_gripper_grasped_bonus = RewTerm(
         func=mdp.gripper_is_grasped_reward,
         params={
             "object_cfg": SceneEntityCfg("object_right"),
             "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"]),
             "action_name": "right_gripper_action",
+            "contact_force_threshold": 20.0,
+            "near_distance_threshold": 0.02,
         },
-        weight=0.0
+        weight=1.0
     )
 
-    left_lifting_object = RewTerm(
-        func=mdp.object_is_lifted,
+    # right_lifted_gate = RewTerm(
+    #     func=mdp.object_lifted_gate,
+    #     params={
+    #         "minimal_lift_height": 0.04,
+    #         "object_cfg": SceneEntityCfg("object_right"),
+    #     },
+    #     weight=5.0
+    # )
+
+    right_object_goal_tracking = RewTerm(
+        func=mdp.object_goal_distance,
         params={
-            "target_height": 0.2, #초기 위치의 x,y를 유지하고 올릴 목표 z 높이
-            "object_cfg": SceneEntityCfg("object_left"),
-        },
-        weight=10.0
-    )
-    right_lifting_object = RewTerm(
-        func=mdp.object_is_lifted,
-        params={
-            "target_height": 0.2, #초기 위치의 x,y를 유지하고 올릴 목표 z 높이
+            "std": 0.3,
+            "command_name": "right_object_pose",
+            "minimal_lift_height": 0.04,
             "object_cfg": SceneEntityCfg("object_right"),
         },
-        weight=0.0
+        weight=15.0
     )
 
-    # left_near_object_ee_velocity = RewTerm(
-    #     func=mdp.near_object_ee_velocity_l2,
-    #     weight=-0.0,
-    #     params={
-    #         "std": 0.06,
-    #         "object_cfg": SceneEntityCfg("object_left"),
-    #         "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_left_ee_tcp"]),
-    #         "robot_cfg": SceneEntityCfg("robot", body_names=["openarm_left_ee_tcp"]),
-    #     },
-    # )
-
-    # right_near_object_ee_velocity = RewTerm(
-    #     func=mdp.near_object_ee_velocity_l2,
-    #     weight=-0.0,
-    #     params={
-    #         "std": 0.06,
-    #         "object_cfg": SceneEntityCfg("object_right"),
-    #         "ee_frame_cfg": SceneEntityCfg("ee_frame", body_names=["openarm_right_ee_tcp"]),
-    #         "robot_cfg": SceneEntityCfg("robot", body_names=["openarm_right_ee_tcp"]),
-    #     },
-    # )
-
-    # left_object_goal_tracking = RewTerm(
-    #     func=mdp.object_goal_distance,
-    #     params={"std": 0.3, "minimal_height": 0.04, "command_name": "left_object_pose", "object_cfg": SceneEntityCfg("object_left")},
-    #     weight=16.0,
-    # )
-
-    # right_object_goal_tracking = RewTerm(
-    #     func=mdp.object_goal_distance,
-    #     params={"std": 0.3, "minimal_height": 0.04, "command_name": "right_object_pose", "object_cfg": SceneEntityCfg("object_right")},
-    #     weight=16.0,
-    # )
-
-    # left_object_goal_tracking_fine_grained = RewTerm(
-    #     func=mdp.object_goal_distance,
-    #     params={"std": 0.05, "minimal_height": 0.04, "command_name": "left_object_pose", "object_cfg": SceneEntityCfg("object_left")},
-    #     weight=5.0,
-    # )
-
-    # right_object_goal_tracking_fine_grained = RewTerm(
-    #     func=mdp.object_goal_distance,
-    #     params={"std": 0.05, "minimal_height": 0.04, "command_name": "right_object_pose", "object_cfg": SceneEntityCfg("object_right")},
-    #     weight=5.0,
-    # )
+    right_object_goal_tracking_fine_grained = RewTerm(
+        func=mdp.object_goal_distance,
+        params={
+            "std": 0.1,
+            "command_name": "right_object_pose",
+            "minimal_lift_height": 0.04,
+            "object_cfg": SceneEntityCfg("object_right"),
+        },
+        weight=5.0
+    )
 
     # action penalty
-    # left_action_rate = RewTerm(
-    #     func=mdp.action_terms_rate_l2,
-    #     weight=-5e-3,
-    #     params={"action_names": ("left_arm_action", "left_gripper_action")},
-    # )
+    left_action_rate = RewTerm(
+        func=mdp.action_terms_rate_l2,
+        weight=-1e-4,
+        params={"action_names": ("left_arm_action", "left_gripper_action")},
+    )
+
+    left_joint_vel = RewTerm(
+        func=mdp.joint_vel_l2,
+        weight=-1e-4,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=["openarm_left_joint.*", "openarm_left_finger_joint.*"]
+            )
+        },
+    )
 
     right_action_rate = RewTerm(
         func=mdp.action_terms_rate_l2,
-        weight=-5e-3,
+        weight=-1e-4,
         params={"action_names": ("right_arm_action", "right_gripper_action")},
     )
-
-    # left_joint_vel = RewTerm(
-    #     func=mdp.joint_vel_l2,
-    #     weight=-1e-4,
-    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_joint1",
-    #                                                                 "openarm_left_joint2",
-    #                                                                 "openarm_left_joint3",
-    #                                                                 "openarm_left_joint4",
-    #                                                                 "openarm_left_joint5",
-    #                                                                 "openarm_left_joint6",
-    #                                                                 "openarm_left_joint7",
-    #                                                                 "openarm_left_finger.*",
-    #                                                               ])},
-    # )
-    
-    # left_finger_vel = RewTerm(
-    #     func=mdp.joint_vel_l2,
-    #     weight=-1,
-    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_left_finger.*"])},
-    # )
 
     right_joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
         weight=-1e-4,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_joint1",
-                                                                    "openarm_right_joint2",
-                                                                    "openarm_right_joint3",
-                                                                    "openarm_right_joint4",
-                                                                    "openarm_right_joint5",
-                                                                    "openarm_right_joint6",
-                                                                    "openarm_right_joint7",
-                                                                    "openarm_right_finger.*",
-                                                                  ])},
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=["openarm_right_joint.*", "openarm_right_finger_joint.*"]
+            )
+        },
     )
-
-    # right_finger_vel = RewTerm(
-    #     func=mdp.joint_vel_l2,
-    #     weight=-1,
-    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=["openarm_right_finger.*"])},
-    # )
-
 
 @configclass
 class TerminationsCfg:
@@ -498,61 +449,57 @@ class TerminationsCfg:
 class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
-    # left_action_rate = CurrTerm(
-    #     func=mdp.modify_reward_weight,
-    #     params={"term_name": "left_action_rate", "weight": -0.05, "num_steps": 2.5e8},
-    # )
-
-    # right_action_rate = CurrTerm(
-    #     func=mdp.modify_reward_weight,
-    #     params={"term_name": "right_action_rate", "weight": -0.05, "num_steps": 2.5e8},
-    # )
-
-    # left_joint_vel = CurrTerm(
-    #     func=mdp.modify_reward_weight,
-    #     params={"term_name": "left_joint_vel", "weight": -0.05, "num_steps": 2.5e8},
-    # )
-
-    # right_joint_vel = CurrTerm(
-    #     func=mdp.modify_reward_weight,
-    #     params={"term_name": "right_joint_vel", "weight": -0.05, "num_steps": 2.5e8},
-    # )
-
-    # reach_weight_left = CurrTerm(
-    # func=mdp.modify_reward_weight,
-    # params={
-    #     "term_name": "left_reaching_object",
-    #     "weight": 1.5,
-    #     "num_steps": 1e9,
-    #     },
-    # )
-
-    # reach_weight_right = CurrTerm(
-    # func=mdp.modify_reward_weight,
-    # params={
-    #     "term_name": "right_reaching_object",
-    #     "weight": 1.5,
-    #     "num_steps": 1e9,
-    #     },
-    # )
-
-    left_reaching_object_weight = CurrTerm(
-        func=mdp.exponential_modify_reward_weight,
+    left_gripper_grasped_bonus = CurrTerm(
+        func=mdp.linear_modify_reward_weight,
         params={
-            "term_name": "left_reaching_object",
-            "weight": 1.0,
-            "num_steps": 100_000,
-            "end_rate_ratio": 4.0,
+            "term_name": "left_gripper_grasped_bonus",
+            "weight": 5.0,
+            "num_steps": 500_000,
         },
     )
 
-    left_gripper_grasped_weight = CurrTerm(
-        func=mdp.exponential_modify_reward_weight,
+    left_action_rate = CurrTerm(
+        func=mdp.modify_reward_weight,
         params={
-            "term_name": "left_gripper_grasped",
-            "weight": 2.0,
-            "num_steps": 100_000,
-            "end_rate_ratio": 4.0,
+            "term_name": "left_action_rate",
+            "weight": -1.0,
+            "num_steps": 20_000,
+        },
+    )
+
+    left_joint_vel = CurrTerm(
+        func=mdp.modify_reward_weight,
+        params={
+            "term_name": "left_joint_vel",
+            "weight": -0.5,
+            "num_steps": 20_000,
+        },
+    )
+
+    right_gripper_grasped_bonus = CurrTerm(
+        func=mdp.linear_modify_reward_weight,
+        params={
+            "term_name": "right_gripper_grasped_bonus",
+            "weight": 5.0,
+            "num_steps": 500_000,
+        },
+    )
+
+    right_action_rate = CurrTerm(
+        func=mdp.modify_reward_weight,
+        params={
+            "term_name": "right_action_rate",
+            "weight": -1.0,
+            "num_steps": 20_000,
+        },
+    )
+
+    right_joint_vel = CurrTerm(
+        func=mdp.modify_reward_weight,
+        params={
+            "term_name": "right_joint_vel",
+            "weight": -0.5,
+            "num_steps": 20_000,
         },
     )
 
@@ -582,7 +529,7 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 2
-        self.episode_length_s = 8.0
+        self.episode_length_s = 6.0
         self.viewer.eye = (3.5, 3.5, 3.5)
         # simulation settings
         self.sim.dt = 0.01  # 100Hz

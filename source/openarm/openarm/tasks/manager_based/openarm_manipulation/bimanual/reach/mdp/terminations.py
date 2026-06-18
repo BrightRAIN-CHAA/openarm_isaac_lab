@@ -61,3 +61,20 @@ def object_reached_goal(
 
     # rewarded if the object is lifted above the threshold
     return distance < threshold
+
+
+def object_lifted_above_target(
+    env: ManagerBasedRLEnv,
+    target_height: float,
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+) -> torch.Tensor:
+    """Terminate when the object reaches the target height above its reset position."""
+    object: RigidObject = env.scene[object_cfg.name]
+    object_pos_w = object.data.root_pos_w[:, 0:3]
+
+    if hasattr(env, "_object_initial_pos") and object_cfg.name in env._object_initial_pos:
+        initial_z = env._object_initial_pos[object_cfg.name][:, 2]
+    else:
+        initial_z = object_pos_w[:, 2]
+
+    return object_pos_w[:, 2] >= initial_z + target_height

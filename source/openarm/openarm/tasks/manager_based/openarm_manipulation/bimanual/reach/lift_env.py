@@ -30,21 +30,21 @@ class BimanualLiftIPPOEnv(ManagerBasedRLEnv):
     _AGENT_REWARD_TERMS = {
         "left_arm": (
             "left_reaching_object",
-            "left_lifting_object",
-            "left_gripper_grasped",
-            "left_near_object_ee_velocity",
+            "left_gripper_grasped_bonus",
+            # "left_lifted_gate",
+            "left_object_goal_tracking",
+            "left_object_goal_tracking_fine_grained",
             "left_action_rate",
             "left_joint_vel",
-            "left_finger_vel",
         ),
         "right_arm": (
             "right_reaching_object",
-            "right_lifting_object",
-            "right_gripper_grasped",
-            "right_near_object_ee_velocity",
+            "right_gripper_grasped_bonus",
+            # "right_lifted_gate",
+            "right_object_goal_tracking",
+            "right_object_goal_tracking_fine_grained",
             "right_action_rate",
             "right_joint_vel",
-            "right_finger_vel",
         ),
     }
 
@@ -151,11 +151,14 @@ class BimanualLiftIPPOEnv(ManagerBasedRLEnv):
         term_names = getattr(self.reward_manager, "_term_names", [])
         step_reward = getattr(self.reward_manager, "_step_reward", None)
         if step_reward is None:
+            fallback_reward = fallback_reward.view(self.num_envs, -1)
+            if fallback_reward.shape[1] != 1:
+                fallback_reward = torch.sum(fallback_reward, dim=1, keepdim=True)
             return {agent: fallback_reward for agent in self.possible_agents}
 
         rewards = {}
         for agent, agent_terms in self._AGENT_REWARD_TERMS.items():
-            agent_reward = torch.zeros_like(fallback_reward)
+            agent_reward = torch.zeros(self.num_envs, device=self.device)
             found_term = False
             for term_name in agent_terms:
                 if term_name not in term_names:
@@ -163,8 +166,11 @@ class BimanualLiftIPPOEnv(ManagerBasedRLEnv):
                 term_idx = term_names.index(term_name)
                 agent_reward += step_reward[:, term_idx] * self.step_dt
                 found_term = True
-            rewards[agent] = agent_reward if found_term else fallback_reward
+            rewards[agent] = agent_reward.view(self.num_envs, 1) if found_term else torch.zeros((self.num_envs, 1), device=self.device)
         return rewards
 
     def _agent_dones(self, done: torch.Tensor) -> dict[str, torch.Tensor]:
+        done = done.view(self.num_envs, -1)
+        if done.shape[1] != 1:
+            done = torch.any(done, dim=1, keepdim=True)
         return {agent: done for agent in self.possible_agents}
